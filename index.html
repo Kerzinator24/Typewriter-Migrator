@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>File Migration Tool - Options</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 flex justify-center items-center min-h-screen">
+<div class="container text-center">
+  <h1 class="text-3xl font-bold text-gray-800 mb-8">Choose Migration Options</h1>
+  <form id="optionsForm">
+    <label class="block mb-4">
+      <input type="checkbox" class="mr-2" name="Basic Adapter" value="Typewriter" disabled> Basic Adapter
+    </label>
+    <label class="block mb-4">
+      <input type="checkbox" class="mr-2" name="Citizens Adapter" value="Citizens"> Citizens Adapter
+    </label>
+    <label class="block mb-4">
+      <input type="checkbox" class="mr-2" name="Hello world" value="test"> Hello world
+    </label>
+  </form>
+  <button id="selectBtn" class="select-btn bg-blue-500 text-white font-bold py-2 px-4 rounded mt-8 transition duration-300 hover:bg-blue-700">Select</button>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const selectBtn = document.getElementById('selectBtn');
+    const firstCheckbox = document.querySelector('input[type="checkbox"]:first-child');
+
+    firstCheckbox.checked = true;
+    selectBtn.addEventListener('click', () => {
+      const selectedOptions = [];
+      document.querySelectorAll('input[type="checkbox"]:checked').forEach(checkbox => {
+        selectedOptions.push(checkbox.value);
+      });
+      localStorage.setItem('selectedOptions', JSON.stringify(selectedOptions));
+      window.location.href = 'file-migration.html';
+    });
+  });
+
+</script>
+</body>
+</html>
