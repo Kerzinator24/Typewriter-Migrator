@@ -19,21 +19,7 @@
     const selectedOptions = JSON.parse(localStorage.getItem('selectedOptions'));
     const dropZonesContainer = document.getElementById('dropZonesContainer');
 
-    // Function to handle dropped folders
-    const handleFolderDrop = (folderName, option) => {
-      console.log(`Folder dropped for ${option}:`, folderName);
-      // Replace drop zone with folder icon and name
-      const dropZone = document.querySelector(`[data-option="${option}"]`);
-      dropZone.innerHTML = `
-      <div class="folder-icon mb-2">
-        <i class="fas fa-folder"></i>
-      </div>
-      <p class="text-gray-500">${folderName}</p>
-    `;
-    };
-
-    // Function to handle dropped items
-    const handleDrop = async (event, option) => {
+    const handleDrop = async (event) => {
       event.preventDefault();
       const items = event.dataTransfer.items;
 
@@ -49,12 +35,11 @@
 
         // Extract the folder name
         const folderName = directory[0].name;
-        handleFolderDrop(folderName, option);
+        handleFolderDrop(folderName);
       }
     };
 
-    // Function to handle click event on drop zone
-    const handleClick = (option) => {
+    const handleClick = () => {
       const input = document.createElement('input');
       input.type = 'file';
       input.webkitdirectory = true; // Allow selecting directories
@@ -62,41 +47,48 @@
         const files = Array.from(event.target.files);
         if (files.length > 0 && files[0].webkitRelativePath) {
           const folderName = files[0].webkitRelativePath.split('/')[0];
-          handleFolderDrop(folderName, option);
+          handleFolderDrop(folderName);
         }
       };
       input.click();
     };
 
-    selectedOptions.forEach(option => {
-      const div = document.createElement('div');
-      div.className = 'drop-zone border-2 border-dashed border-gray-300 rounded-md p-8 mb-8 mr-8';
-      div.dataset.option = option;
-      div.innerHTML = `
-      <p class="text-gray-500">Click or drag & drop your ${option} folder here</p>
+    const handleFolderDrop = (folderName) => {
+      console.log('Folder dropped:', folderName);
+      // Replace drop zone with folder icon and name
+      dropZonesContainer.innerHTML = `
+      <div class="drop-zone border-2 border-dashed border-gray-300 rounded-md p-8 mb-8 mr-8">
+        <p class="text-gray-500">Selected folder: ${folderName}</p>
+      </div>
     `;
-      dropZonesContainer.appendChild(div);
+    };
 
-      // Add drop event listener to each drop zone
-      div.addEventListener('dragover', (event) => {
+    // Show only one drop zone after selecting migration options
+    if (selectedOptions.length > 0) {
+      dropZonesContainer.innerHTML = `
+      <div class="drop-zone border-2 border-dashed border-gray-300 rounded-md p-8 mb-8 mr-8">
+        <p class="text-gray-500">Click here to select your server's plugin folder</p>
+      </div>
+    `;
+      const dropZone = dropZonesContainer.querySelector('.drop-zone');
+      dropZone.addEventListener('dragover', (event) => {
         event.preventDefault();
-        div.classList.add('dragover');
+        dropZone.classList.add('dragover');
       });
 
-      div.addEventListener('dragleave', () => {
-        div.classList.remove('dragover');
+      dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('dragover');
       });
 
-      div.addEventListener('drop', (event) => {
-        handleDrop(event, option);
-        div.classList.remove('dragover');
+      dropZone.addEventListener('drop', (event) => {
+        handleDrop(event);
+        dropZone.classList.remove('dragover');
       });
 
-      // Add click event listener to each drop zone
-      div.addEventListener('click', () => {
-        handleClick(option);
+      dropZone.addEventListener('click', () => {
+        handleClick();
       });
-    });
+    }
 
     const migrateBtn = document.getElementById('migrateBtn');
     const progressBar = document.getElementById('progressBar');
@@ -119,6 +111,7 @@
       }, 500);
     });
   });
+
 </script>
 </body>
 </html>
