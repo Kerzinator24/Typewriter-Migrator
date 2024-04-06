@@ -19,35 +19,53 @@
     const selectedOptions = JSON.parse(localStorage.getItem('selectedOptions'));
     const dropZonesContainer = document.getElementById('dropZonesContainer');
 
-    // Function to handle dropped files or directories
+    // Function to handle dropped folders
+    const handleFolderDrop = (folderName, option) => {
+      console.log(`Folder dropped for ${option}:`, folderName);
+      // Replace drop zone with folder icon and name
+      const dropZone = document.querySelector(`[data-option="${option}"]`);
+      dropZone.innerHTML = `
+      <div class="folder-icon mb-2">
+        <i class="fas fa-folder"></i>
+      </div>
+      <p class="text-gray-500">${folderName}</p>
+    `;
+    };
+
+    // Function to handle dropped items
     const handleDrop = async (event, option) => {
       event.preventDefault();
       const items = event.dataTransfer.items;
-      const files = [];
 
-      // Traverse dropped items
-      for (let i = 0; i < items.length; i++) {
-        const item = items[i].webkitGetAsEntry(); // Get file or directory entry
+      // Check if any dropped item is a directory
+      const isDirectory = Array.from(items).some(item => item.kind === 'directory');
 
-        // Recursively traverse directories
-        const traverseDirectory = async (entry, path = '') => {
-          if (entry.isFile) {
-            files.push({file: await new Promise(resolve => entry.file(resolve)), path});
-          } else if (entry.isDirectory) {
-            const dirReader = entry.createReader();
-            const dirEntries = await new Promise(resolve => dirReader.readEntries(resolve));
+      // If any dropped item is a directory, handle it
+      if (isDirectory) {
+        const directory = await new Promise(resolve => {
+          const entry = event.dataTransfer.items[0].webkitGetAsEntry();
+          entry.createReader().readEntries(entries => resolve(entries));
+        });
 
-            for (const dirEntry of dirEntries) {
-              await traverseDirectory(dirEntry, `${path}${entry.name}/`);
-            }
-          }
-        };
-
-        await traverseDirectory(item);
+        // Extract the folder name
+        const folderName = directory[0].name;
+        handleFolderDrop(folderName, option);
       }
+    };
 
-      // Handle the files obtained
-      console.log(`Files dropped for ${option}:`, files);
+    // Function to handle click event on drop zone
+    const handleClick = (option) => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.webkitdirectory = true; // Allow selecting directories
+      input.onchange = (event) => {
+        const files = Array.from(event.target.files);
+        if (files.length > 0 && files[0].webkitRelativePath) {
+          const folderName = files[0].webkitRelativePath.split('/')[0];
+          handleFolderDrop(folderName, option);
+        }
+      };
+      input.click();
     };
 
     selectedOptions.forEach(option => {
@@ -55,7 +73,7 @@
       div.className = 'drop-zone border-2 border-dashed border-gray-300 rounded-md p-8 mb-8 mr-8';
       div.dataset.option = option;
       div.innerHTML = `
-      <p class="text-gray-500">Drag & Drop ${option} files here</p>
+      <p class="text-gray-500">Click or drag & drop ${option} folders here</p>
     `;
       dropZonesContainer.appendChild(div);
 
@@ -73,8 +91,12 @@
         handleDrop(event, option);
         div.classList.remove('dragover');
       });
-    });
 
+      // Add click event listener to each drop zone
+      div.addEventListener('click', () => {
+        handleClick(option);
+      });
+    });
 
     const migrateBtn = document.getElementById('migrateBtn');
     const progressBar = document.getElementById('progressBar');
