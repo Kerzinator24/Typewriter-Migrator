@@ -3,122 +3,143 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>File Migration Tool</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <title>Zip File Uploader</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    #uploadButton {
+      margin: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #fileList {
+      list-style-type: none;
+      padding: 0;
+    }
+    #fileList li {
+      margin: 5px;
+    }
+  </style>
 </head>
-<body class="bg-gray-100 flex justify-center items-center min-h-screen">
-<div class="container text-center">
-  <h1 class="text-3xl font-bold text-gray-800 mb-8">File Migration Tool</h1>
-  <div id="dropZonesContainer" class="flex flex-wrap justify-center"></div>
-  <button id="migrateBtn" class="migrate-btn bg-blue-500 text-white font-bold py-2 px-4 rounded transition duration-300 hover:bg-blue-700 transform hover:scale-105">Migrate Files</button>
-  <div id="progressBar" class="progress-bar hidden bg-gray-300 h-2 rounded-full mt-8"></div>
-</div>
+<body>
+<h1>Zip File Uploader</h1>
+<input type="file" id="fileInput" style="display: none;" accept=".zip">
+<button id="uploadButton">Upload Zip File</button>
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const selectedOptions = JSON.parse(localStorage.getItem('selectedOptions'));
-    const dropZonesContainer = document.getElementById('dropZonesContainer');
-
-    // Function to handle dropped folders
-    const handleFolderDrop = (folderName, option) => {
-      console.log(`Folder dropped for ${option}:`, folderName);
-      // Replace drop zone with folder icon and name
-      const dropZone = document.querySelector(`[data-option="${option}"]`);
-      dropZone.innerHTML = `
-      <div class="folder-icon mb-2">
-        <i class="fas fa-folder"></i>
-      </div>
-      <p class="text-gray-500">${folderName}</p>
-    `;
-    };
-
-    // Function to handle dropped items
-    const handleDrop = async (event, option) => {
-      event.preventDefault();
-      const items = event.dataTransfer.items;
-
-      // Check if any dropped item is a directory
-      const isDirectory = Array.from(items).some(item => item.kind === 'directory');
-
-      // If any dropped item is a directory, handle it
-      if (isDirectory) {
-        const directory = await new Promise(resolve => {
-          const entry = event.dataTransfer.items[0].webkitGetAsEntry();
-          entry.createReader().readEntries(entries => resolve(entries));
-        });
-
-        // Extract the folder name
-        const folderName = directory[0].name;
-        handleFolderDrop(folderName, option);
-      }
-    };
-
-    // Function to handle click event on drop zone
-    const handleClick = (option) => {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.webkitdirectory = true; // Allow selecting directories
-      input.onchange = (event) => {
-        const files = Array.from(event.target.files);
-        if (files.length > 0 && files[0].webkitRelativePath) {
-          const folderName = files[0].webkitRelativePath.split('/')[0];
-          handleFolderDrop(folderName, option);
-        }
-      };
-      input.click();
-    };
-
-    selectedOptions.forEach(option => {
-      const div = document.createElement('div');
-      div.className = 'drop-zone border-2 border-dashed border-gray-300 rounded-md p-8 mb-8 mr-8';
-      div.dataset.option = option;
-      div.innerHTML = `
-      <p class="text-gray-500">Click or drag & drop your ${option} folder here</p>
-    `;
-      dropZonesContainer.appendChild(div);
-
-      // Add drop event listener to each drop zone
-      div.addEventListener('dragover', (event) => {
-        event.preventDefault();
-        div.classList.add('dragover');
-      });
-
-      div.addEventListener('dragleave', () => {
-        div.classList.remove('dragover');
-      });
-
-      div.addEventListener('drop', (event) => {
-        handleDrop(event, option);
-        div.classList.remove('dragover');
-      });
-
-      // Add click event listener to each drop zone
-      div.addEventListener('click', () => {
-        handleClick(option);
-      });
-    });
-
-    const migrateBtn = document.getElementById('migrateBtn');
-    const progressBar = document.getElementById('progressBar');
-
-    migrateBtn.addEventListener('click', () => {
-      // Show loading bar
-      progressBar.classList.remove('hidden');
-
-      // Simulate file migration progress
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += 10;
-        progressBar.style.width = `${progress}%`;
-        if (progress >= 100) {
-          clearInterval(interval);
-          progressBar.style.width = '0%';
-          // Hide loading bar when migration is complete
-          progressBar.classList.add('hidden');
-        }
-      }, 500);
-    });
+  document.getElementById('uploadButton').addEventListener('click', function() {
+    document.getElementById('fileInput').click();
   });
+
+  document.getElementById('fileInput').addEventListener('change', function() {
+    const file = this.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const arrayBuffer = e.target.result;
+      unzipAndRezip(arrayBuffer);
+    };
+    reader.readAsArrayBuffer(file);
+  });
+
+  function unzipAndRezip(arrayBuffer) {
+    JSZip.loadAsync(arrayBuffer).then(function(zip) {
+      const newZip = new JSZip();
+      zip.forEach(function(relativePath, zipEntry) {
+        if (!zipEntry.dir) { // Skip directories
+          newZip.file(zipEntry.name, zipEntry.async("arraybuffer"), { binary: true });
+        }
+      });
+
+      // Call migrateFolder function after unzipping
+      migrateFolder(zip).then(function(files) {
+        confirmFiles(files).then(function(confirmedFiles) {
+          if (confirmedFiles.length > 0) {
+            confirmedFiles.forEach(function(fileName) {
+              newZip.file(fileName, zip.file(fileName).async("arraybuffer"), { binary: true });
+            });
+            newZip.generateAsync({ type: "blob" }).then(function(blob) {
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = 'new_zip_file.zip';
+              document.body.appendChild(a);
+              a.click();
+              window.URL.revokeObjectURL(url);
+            });
+          } else {
+            console.log("No files selected for migration.");
+          }
+        });
+      });
+    });
+  }
+
+  async function migrateFolder(zip) {
+    const topLevelFolders = Object.keys(zip.files);
+    const adaptersFolderName = topLevelFolders.find(folderName => folderName.endsWith('/adapters/'));
+    if (!adaptersFolderName) return []; // If adapters folder doesn't exist, return an empty array
+
+    const adaptersFolder = zip.folder(adaptersFolderName);
+    const files = [];
+    await adaptersFolder.forEach(async function(relativePath, zipEntry) {
+      if (!zipEntry.dir) { // If it's a file
+        files.push(zipEntry.name);
+      }
+    });
+
+    // Remove the first item from the array
+    files.shift();
+
+    return files;
+  }
+
+  function confirmFiles(files) {
+    const confirmedFiles = [];
+    if (files.length === 0) {
+      alert("No files found in the 'adapters' folder.");
+      return Promise.resolve(confirmedFiles);
+    }
+
+    const fileListElement = document.createElement('ul');
+    fileListElement.id = "fileList";
+
+    files.forEach(function(fileName) {
+      const listItem = document.createElement('li');
+      const checkbox = document.createElement('input');
+      checkbox.type = "checkbox";
+      checkbox.name = "file";
+      checkbox.value = fileName;
+      listItem.appendChild(checkbox);
+      listItem.appendChild(document.createTextNode(fileName));
+      fileListElement.appendChild(listItem);
+    });
+
+    const confirmButton = document.createElement('button');
+    confirmButton.textContent = "Confirm";
+    confirmButton.addEventListener('click', function() {
+      const checkedFiles = Array.from(document.querySelectorAll('input[name="file"]:checked')).map(function(checkbox) {
+        return checkbox.value;
+      });
+      confirmedFiles.push(...checkedFiles);
+      document.body.removeChild(fileListElement);
+      document.body.removeChild(confirmButton);
+    });
+
+    document.body.appendChild(fileListElement);
+    document.body.appendChild(confirmButton);
+
+    return new Promise(function(resolve) {
+      confirmButton.addEventListener('click', function() {
+        resolve(confirmedFiles);
+      });
+    });
+  }
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
 </body>
 </html>
