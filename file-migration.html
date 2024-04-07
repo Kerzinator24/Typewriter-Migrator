@@ -16,102 +16,205 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const selectedOptions = JSON.parse(localStorage.getItem('selectedOptions'));
     const dropZonesContainer = document.getElementById('dropZonesContainer');
+    let selectedFolder = null;
 
-    const handleDrop = async (event) => {
-      event.preventDefault();
-      const items = event.dataTransfer.items;
-
-      // Check if any dropped item is a directory
-      const isDirectory = Array.from(items).some(item => item.kind === 'directory');
-
-      // If any dropped item is a directory, handle it
-      if (isDirectory) {
-        const directory = await new Promise(resolve => {
-          const entry = event.dataTransfer.items[0].webkitGetAsEntry();
-          entry.createReader().readEntries(entries => resolve(entries));
+    const checkForTypewriterJar = async (entry, path = '') => {
+      if (entry.isFile) {
+        const file = await new Promise((resolve, reject) => {
+          entry.file(resolve, reject);
         });
+        if (file.name === 'typewriter.jar') {
+          console.log('Found "typewriter.jar" in the folder.');
+          // After finding 'typewriter.jar', look for a folder named 'Typewriter'
+          const dirReader = entry.createReader();
+          const entries = await new Promise((resolve, reject) => {
+            dirReader.readEntries(resolve, reject);
+          });
+          for (const subEntry of entries) {
+            if (subEntry.isDirectory && subEntry.name === 'Typewriter') {
+              console.log('Found "Typewriter" folder in the folder.');
+              // After finding 'Typewriter' folder, look for a folder named 'adapters'
+              const typewriterDirReader = subEntry.createReader();
+              const typewriterEntries = await new Promise((resolve, reject) => {
+                typewriterDirReader.readEntries(resolve, reject);
+              });
+              for (const typewriterSubEntry of typewriterEntries) {
+                if (typewriterSubEntry.isDirectory && typewriterSubEntry.name === 'adapters') {
+                  console.log('Found "adapters" folder in the "Typewriter" folder.');
+                  // After finding 'adapters' folder, create an array of jar file names
+                  const adaptersDirReader = typewriterSubEntry.createReader();
+                  const adaptersEntries = await new Promise((resolve, reject) => {
+                    adaptersDirReader.readEntries(resolve, reject);
+                  });
+                  const jarFiles = [];
+                  for (const adaptersSubEntry of adaptersEntries) {
+                    if (adaptersSubEntry.isFile && adaptersSubEntry.name.endsWith('.jar')) {
+                      jarFiles.push(adaptersSubEntry.name.replace('.jar', ''));
+                    }
+                  }
+                  console.log('Jar files in "adapters" folder:', jarFiles);
+                }
+              }
+            }
+          }
+        }
+      } else if (entry.isDirectory) {
+        const dirReader = entry.createReader();
+        const entries = await new Promise((resolve, reject) => {
+          dirReader.readEntries(resolve, reject);
+        });
+        for (const subEntry of entries) {
+          await checkForTypewriterJar(subEntry, `${path + entry.name}/`);
+        }
+      }
+    };
 
-        // Extract the folder name
-        const folderName = directory[0].name;
-        handleFolderDrop(folderName);
+    const restructureFiles = async (entry, path = '') => {
+      let modifiedEntry = entry;
+      if (path === '' && entry.name !== 'plugins') {
+        const userConfirmation = confirm('The uploaded folder is not named "plugins". Are you sure you want to continue?');
+        if (!userConfirmation) {
+          return;
+        } else {
+          await checkForTypewriterJar(entry, path);
+        }
+      }
+      if (entry.isFile) {
+        const file = await new Promise((resolve, reject) => {
+          entry.file(resolve, reject);
+        });
+        // Modify the file structure here as needed
+      } else if (entry.isDirectory) {
+        const dirReader = entry.createReader();
+        const entries = await new Promise((resolve, reject) => {
+          dirReader.readEntries(resolve, reject);
+        });
+        for (const subEntry of entries) {
+          await restructureFiles(subEntry, `${path + entry.name}/`);
+        }
+      }
+      return modifiedEntry;
+    };
+
+    const processFolder = async (folder) => {
+      const modifiedFolder = await restructureFiles(folder);
+      console.log('Processing folder:', modifiedFolder);
+      return modifiedFolder;
+    };
+
+    const downloadFolder = async (folder) => {
+      const zip = new JSZip();
+
+      const addFilesToZip = async (entry, path = '') => {
+        if (entry.isFile) {
+          const file = await new Promise((resolve, reject) => {
+            entry.file(resolve, reject);
+          });
+          zip.file(path + entry.name, file);
+        } else if (entry.isDirectory) {
+          const dirReader = entry.createReader();
+          const entries = await new Promise((resolve, reject) => {
+            dirReader.readEntries(resolve, reject);
+          });
+          for (const subEntry of entries) {
+            await addFilesToZip(subEntry, `${path + entry.name}/`);
+          }
+        }
+      };
+
+      await addFilesToZip(folder);
+
+      const content = await zip.generateAsync({ type: 'blob' });
+
+      const url = window.URL.createObjectURL(content);
+      const element = document.createElement('a');
+      element.href = url;
+      element.setAttribute('download', 'folder.zip');
+      element.style.display = 'none';
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+
+      window.URL.revokeObjectURL(url);
+    };
+
+    const handleFolderDrop = async (file) => {
+      const zip = new JSZip();
+      const data = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(file);
+      });
+      const unzipped = await zip.loadAsync(data);
+      for (const fileName in unzipped.files) {
+        const fileEntry = unzipped.file(fileName);
+        if (fileEntry) {
+          const content = await fileEntry.async('blob');
+          const file = new File([content], fileName);
+          await processFolder(file);
+        }
       }
     };
 
     const handleClick = () => {
       const input = document.createElement('input');
       input.type = 'file';
-      input.webkitdirectory = true; // Allow selecting directories
-      input.onchange = (event) => {
+      input.accept = '.zip';
+      input.onchange = async (event) => {
         const files = Array.from(event.target.files);
-        if (files.length > 0 && files[0].webkitRelativePath) {
-          const folderName = files[0].webkitRelativePath.split('/')[0];
-          handleFolderDrop(folderName);
+        if (files.length > 0) {
+          const file = files[0];
+          await handleFolderDrop(file);
         }
       };
       input.click();
     };
 
-    const handleFolderDrop = (folderName) => {
-      console.log('Folder dropped:', folderName);
-      // Replace drop zone with folder icon and name
-      dropZonesContainer.innerHTML = `
-      <div class="drop-zone border-2 border-dashed border-gray-300 rounded-md p-8 mb-8 mr-8">
-        <p class="text-gray-500">Selected folder: ${folderName}</p>
-      </div>
-    `;
-    };
+    dropZonesContainer.innerHTML = `
+    <div class="drop-zone border-2 border-dashed border-gray-300 rounded-md p-8 mb-8 mr-8">
+      <p class="text-gray-500">Click here to select your server's plugin folder</p>
+    </div>
+  `;
+    const dropZone = dropZonesContainer.querySelector('.drop-zone');
 
-    // Show only one drop zone after selecting migration options
-    if (selectedOptions.length > 0) {
-      dropZonesContainer.innerHTML = `
-      <div class="drop-zone border-2 border-dashed border-gray-300 rounded-md p-8 mb-8 mr-8">
-        <p class="text-gray-500">Click here to select your server's plugin folder</p>
-      </div>
-    `;
-      const dropZone = dropZonesContainer.querySelector('.drop-zone');
-      dropZone.addEventListener('dragover', (event) => {
-        event.preventDefault();
-        dropZone.classList.add('dragover');
-      });
+    dropZone.addEventListener('dragover', (event) => {
+      event.preventDefault();
+      dropZone.classList.add('dragover');
+    });
 
-      dropZone.addEventListener('dragleave', () => {
-        dropZone.classList.remove('dragover');
-      });
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('dragover');
+    });
 
-      dropZone.addEventListener('drop', (event) => {
-        handleDrop(event);
-        dropZone.classList.remove('dragover');
-      });
+    dropZone.addEventListener('drop', async (event) => {
+      event.preventDefault();
+      dropZone.classList.remove('dragover');
 
-      dropZone.addEventListener('click', () => {
-        handleClick();
-      });
-    }
+      const items = event.dataTransfer.items;
+      if (items.length > 0 && items[0].webkitGetAsEntry) {
+        const entry = items[0].webkitGetAsEntry();
+        if (entry.isDirectory) {
+          await handleFolderDrop(entry);
+        }
+      }
+    });
 
     const migrateBtn = document.getElementById('migrateBtn');
-    const progressBar = document.getElementById('progressBar');
+    migrateBtn.addEventListener('click', async () => {
+      if (selectedFolder) {
+        await downloadFolder(selectedFolder);
+      } else {
+        alert('Please select a folder to migrate.');
+      }
+    });
 
-    migrateBtn.addEventListener('click', () => {
-      // Show loading bar
-      progressBar.classList.remove('hidden');
-
-      // Simulate file migration progress
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += 10;
-        progressBar.style.width = `${progress}%`;
-        if (progress >= 100) {
-          clearInterval(interval);
-          progressBar.style.width = '0%';
-          // Hide loading bar when migration is complete
-          progressBar.classList.add('hidden');
-        }
-      }, 500);
+    dropZone.addEventListener('click', () => {
+      handleClick();
     });
   });
-
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
 </body>
 </html>
