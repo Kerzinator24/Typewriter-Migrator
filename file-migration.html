@@ -115,7 +115,7 @@
       checkbox.name = "file";
       checkbox.value = fileName;
       listItem.appendChild(checkbox);
-      listItem.appendChild(document.createTextNode(fileName));
+      listItem.appendChild(document.createTextNode(getFileName(fileName)));
       fileListElement.appendChild(listItem);
     });
 
@@ -138,6 +138,10 @@
         resolve(confirmedFiles);
       });
     });
+  }
+
+  function getFileName(filePath) {
+    return filePath.split('/').pop().replace(/\.jar$/i, '').replace(/([a-z])([A-Z])/g, '$1 $2');
   }
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
