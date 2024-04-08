@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zip File Uploader</title>
+  <title>Typewriter Auto-Migration Tool</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <style>
     @keyframes slideInFromTop {
@@ -28,7 +28,7 @@
   </style>
 </head>
 <body class="bg-gray-100 flex flex-col items-center justify-center h-screen">
-<h1 class="text-4xl font-bold mb-8">Zip File Uploader</h1>
+<h1 class="text-4xl font-bold mb-8">Typewriter Auto-Migration Tool</h1>
 <div id="uploadArea">
   <input type="file" id="fileInput" class="hidden" accept=".zip">
   <button id="uploadButton" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out">Upload Zip File</button>
@@ -213,7 +213,7 @@
   function confirmFiles(files) {
     const confirmedFiles = [];
     if (files.length === 0) {
-      alert("No files found in the 'adapters' folder.");
+      alert("No files found in the 'adapters' folder");
       return Promise.resolve(confirmedFiles);
     }
 
