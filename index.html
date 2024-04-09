@@ -25,6 +25,30 @@
         opacity: 1;
       }
     }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
+    }
+
+    .modal-content {
+      background-color: #fefefe;
+      margin: 20% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+    }
+
+    .modal-content button {
+      margin: 5px;
+    }
   </style>
 </head>
 <body class="bg-gray-100 flex flex-col items-center justify-center h-screen">
@@ -34,7 +58,19 @@
   <button id="uploadButton" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out">Upload Zip File</button>
 </div>
 
+<div id="myModal" class="modal">
+  <div class="modal-content">
+    <h2 class="text-xl font-bold mb-4">Choose migration option</h2>
+    <button id="migrateAllBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out mr-4">Migrate All NPCs</button>
+    <button id="migrateTypewriterBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out">Migrate NPCs Used by Typewriter</button>
+  </div>
+</div>
+
 <script>
+  let migrateAll = false;
+  let migrateTypewriter = false;
+  let modalDisplayed = false;
+
   document.getElementById('uploadButton').addEventListener('click', function() {
     document.getElementById('fileInput').click();
   });
@@ -128,14 +164,39 @@
             confirmButton.textContent = "Confirm";
             confirmButton.classList.add("bg-blue-500", "hover:bg-blue-700", "text-white", "font-bold", "py-2", "px-4", "rounded", "transition", "duration-300", "ease-in-out", "mt-4", "inline-block");
             confirmButton.addEventListener('click', function() {
-              const checkedFiles = Array.from(document.querySelectorAll('input[name="file"]:checked')).map(function(checkbox) {
-                return checkbox.value;
-              });
-              selectedModules.push(...checkedFiles); // Add selected files to the array
-              console.log(selectedModules); // Print array to console
+              if (!modalDisplayed) {
+                const checkedFiles = Array.from(document.querySelectorAll('input[name="file"]:checked')).map(function(checkbox) {
+                  return checkbox.value;
+                });
+                selectedModules.push(...checkedFiles); // Add selected files to the array
 
-              // Replace the checkbox list with the upload list
-              displayUploadList(selectedModules);
+                // Check if selectedModules contain files with "Citizens" in their names
+                const containsCitizens = selectedModules.some(file => file.includes("Citizens"));
+
+                if (containsCitizens) {
+                  document.getElementById('myModal').style.display = "block";
+                  modalDisplayed = true;
+
+                  document.getElementById('migrateAllBtn').addEventListener('click', function() {
+                    migrateAll = true;
+                    migrateTypewriter = false;
+                    console.log("Migrating all Citizens NPCs to Typewriter...");
+                    document.getElementById('myModal').style.display = "none";
+                    displayUploadList(selectedModules);
+                  });
+
+                  document.getElementById('migrateTypewriterBtn').addEventListener('click', function() {
+                    migrateAll = false;
+                    migrateTypewriter = true;
+                    console.log("Migrating only those Citizens NPCs already used by Typewriter...");
+                    document.getElementById('myModal').style.display = "none";
+                    displayUploadList(selectedModules);
+                  });
+                } else {
+                  console.log(selectedModules); // Print array to console
+                  displayUploadList(selectedModules);
+                }
+              }
             });
 
             document.getElementById('uploadArea').appendChild(confirmButton);
