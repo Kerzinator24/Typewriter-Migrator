@@ -71,6 +71,9 @@
   let migrateTypewriter = false;
   let modalDisplayed = false;
 
+  // Array of modules that can be migrated
+  const migratableModules = ['Citizens', /* Add other migratable modules here */];
+
   document.getElementById('uploadButton').addEventListener('click', function() {
     document.getElementById('fileInput').click();
   });
@@ -170,32 +173,8 @@
                 });
                 selectedModules.push(...checkedFiles); // Add selected files to the array
 
-                // Check if selectedModules contain files with "Citizens" in their names
-                const containsCitizens = selectedModules.some(file => file.includes("Citizens"));
-
-                if (containsCitizens) {
-                  document.getElementById('myModal').style.display = "block";
-                  modalDisplayed = true;
-
-                  document.getElementById('migrateAllBtn').addEventListener('click', function() {
-                    migrateAll = true;
-                    migrateTypewriter = false;
-                    console.log("Migrating all Citizens NPCs to Typewriter...");
-                    document.getElementById('myModal').style.display = "none";
-                    displayUploadList(selectedModules);
-                  });
-
-                  document.getElementById('migrateTypewriterBtn').addEventListener('click', function() {
-                    migrateAll = false;
-                    migrateTypewriter = true;
-                    console.log("Migrating only those Citizens NPCs already used by Typewriter...");
-                    document.getElementById('myModal').style.display = "none";
-                    displayUploadList(selectedModules);
-                  });
-                } else {
-                  console.log(selectedModules); // Print array to console
-                  displayUploadList(selectedModules);
-                }
+                // Check if migration is needed
+                checkIfMigrationNeeded(selectedModules);
               }
             });
 
@@ -286,6 +265,17 @@
   function formatFileName(filePath) {
     const formattedFileName = filePath.split('/').pop().replace(/\.jar$/i, '').replace(/([a-z])([A-Z])/g, '$1 $2').replace(/Adapter/g, '').trim();
     return formattedFileName.includes("Basic") ? null : formattedFileName;
+  }
+
+  function checkIfMigrationNeeded(selectedModules) {
+    const needsMigration = selectedModules.some(module => migratableModules.some(m => module.includes(m)));
+    if (!needsMigration) {
+      // Display a message indicating that migration is not needed
+      document.getElementById('uploadArea').innerHTML = '<p class="text-xl font-semibold text-red-600">No migration needed for the selected modules.</p>';
+    } else {
+      // Proceed with migration
+      displayUploadList(selectedModules);
+    }
   }
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
