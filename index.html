@@ -49,6 +49,10 @@
     .modal-content button {
       margin: 5px;
     }
+
+    .no-migration-needed {
+      color: red;
+    }
   </style>
 </head>
 <body class="bg-gray-100 flex flex-col items-center justify-center h-screen">
@@ -214,6 +218,7 @@
         });
       } else {
         uploadButton.textContent = "No migration needed";
+        uploadButton.classList.add("no-migration-needed"); // Style the button red
         uploadButton.disabled = true;
       }
 
