@@ -3,42 +3,286 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>File Migration Tool - Options</title>
+  <title>Typewriter Auto-Migration Tool</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    @keyframes slideInFromTop {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
+    }
+
+    .modal-content {
+      background-color: #fefefe;
+      margin: 20% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+    }
+
+    .modal-content button {
+      margin: 5px;
+    }
+  </style>
 </head>
-<body class="bg-gray-100 flex justify-center items-center min-h-screen">
-<div class="container text-center">
-  <h1 class="text-3xl font-bold text-gray-800 mb-8">Choose Migration Options</h1>
-  <form id="optionsForm">
-    <label class="block mb-4">
-      <input type="checkbox" class="mr-2" name="Basic Adapter" value="Typewriter" disabled> Basic Adapter
-    </label>
-    <label class="block mb-4">
-      <input type="checkbox" class="mr-2" name="Citizens Adapter" value="Citizens"> Citizens Adapter
-    </label>
-    <label class="block mb-4">
-      <input type="checkbox" class="mr-2" name="Hello world" value="test"> Hello world
-    </label>
-  </form>
-  <button id="selectBtn" class="select-btn bg-blue-500 text-white font-bold py-2 px-4 rounded mt-8 transition duration-300 hover:bg-blue-700">Select</button>
+<body class="bg-gray-100 flex flex-col items-center justify-center h-screen">
+<h1 class="text-4xl font-bold mb-8">Typewriter Auto-Migration Tool</h1>
+<div id="uploadArea">
+  <input type="file" id="fileInput" class="hidden">
+  <button id="uploadButton" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out">Upload File</button>
+</div>
+
+<div id="myModal" class="modal">
+  <div class="modal-content">
+    <h2 class="text-xl font-bold mb-4">Choose migration option</h2>
+    <button id="migrateAllBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out mr-4">Migrate All NPCs</button>
+    <button id="migrateTypewriterBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out">Migrate NPCs Used by Typewriter</button>
+  </div>
 </div>
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const selectBtn = document.getElementById('selectBtn');
-    const firstCheckbox = document.querySelector('input[type="checkbox"]:first-child');
+  let migrateAll = false;
+  let migrateTypewriter = false;
+  let modalDisplayed = false;
 
-    firstCheckbox.checked = true;
-    selectBtn.addEventListener('click', () => {
-      const selectedOptions = [];
-      document.querySelectorAll('input[type="checkbox"]:checked').forEach(checkbox => {
-        selectedOptions.push(checkbox.value);
-      });
-      localStorage.setItem('selectedOptions', JSON.stringify(selectedOptions));
-      window.location.href = 'file-migration.html';
-    });
+  // Array of modules that can be migrated
+  const migratableModules = ['Citizens', /* Add other migratable modules here */];
+
+  document.getElementById('uploadButton').addEventListener('click', function() {
+    document.getElementById('fileInput').click();
   });
 
+  document.getElementById('fileInput').addEventListener('change', function() {
+    const file = this.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const arrayBuffer = e.target.result;
+      unzipAndRezip(arrayBuffer);
+    };
+    reader.readAsArrayBuffer(file);
+  });
+
+  function unzipAndRezip(arrayBuffer) {
+    JSZip.loadAsync(arrayBuffer).then(function(zip) {
+      const newZip = new JSZip();
+      zip.forEach(function(relativePath, zipEntry) {
+        if (!zipEntry.dir) { // Skip directories
+          newZip.file(zipEntry.name, zipEntry.async("arraybuffer"), { binary: true });
+        }
+      });
+
+      // Call migrateFolder function after unzipping
+      migrateFolder(zip).then(function(files) {
+        confirmFiles(files).then(function(confirmedFiles) {
+          if (confirmedFiles.length > 0) {
+            document.getElementById('uploadArea').innerHTML = '<h2 class="text-xl font-bold mb-4">Choose which data you want to migrate</h2><ul id="fileList" class="list-disc pl-8"></ul>';
+
+            const selectedModules = []; // Array to store selected modules
+            confirmedFiles.forEach(function(fileName, index) {
+              setTimeout(() => {
+                const listItem = document.createElement('li');
+                listItem.classList.add("flex", "items-center", "transition", "transform", "ease-in-out", "duration-300", "hover:scale-105", "delay-800", "animate__animated", "animate__fadeIn", "animate__delay-" + (index + 1), "animate__slideInFromTop");
+
+                const checkbox = document.createElement('input');
+                checkbox.type = "checkbox";
+                checkbox.name = "file";
+                checkbox.value = fileName;
+                checkbox.classList.add("opacity-0");
+                listItem.appendChild(checkbox);
+
+                const textNode = document.createTextNode(formatFileName(fileName));
+                if (textNode) { // Only append text if it's not null
+                  const textContainer = document.createElement('span');
+                  textContainer.appendChild(textNode);
+                  textContainer.classList.add("ml-2"); // Adding margin between checkbox and text
+                  listItem.appendChild(textContainer);
+                }
+
+                document.getElementById('fileList').appendChild(listItem);
+
+                // Trigger reflow to ensure checkbox and textNode are painted before adding fadeIn animation
+                void listItem.offsetWidth;
+
+                checkbox.classList.add("opacity-100", "transition", "duration-300", "delay-800", "animate__animated", "animate__fadeIn", "animate__delay-" + (index + 1));
+              }, 800 * index);
+            });
+
+            const confirmButton = document.createElement('button');
+            confirmButton.textContent = "Confirm";
+            confirmButton.classList.add("bg-blue-500", "hover:bg-blue-700", "text-white", "font-bold", "py-2", "px-4", "rounded", "transition", "duration-300", "ease-in-out", "mt-4", "inline-block");
+            confirmButton.addEventListener('click', function() {
+              if (!modalDisplayed) {
+                const checkedFiles = Array.from(document.querySelectorAll('input[name="file"]:checked')).map(function(checkbox) {
+                  return checkbox.value;
+                });
+                selectedModules.push(...checkedFiles); // Add selected files to the array
+                console.log("Selected Modules:", selectedModules); // Output selected modules to console
+
+                // Check if migration is needed
+                checkIfMigrationNeeded(selectedModules);
+              }
+            });
+
+            document.getElementById('uploadArea').appendChild(confirmButton);
+          } else {
+            console.log("No files selected for migration.");
+          }
+        });
+      });
+    });
+  }
+
+  function displaySelectedModules(selectedModules) {
+    const fileList = document.getElementById('fileList');
+    fileList.innerHTML = ''; // Clear the file list
+    selectedModules.forEach(function(fileName, index) {
+      const listItem = document.createElement('li');
+      listItem.classList.add("flex", "items-center", "transition", "transform", "ease-in-out", "duration-300", "hover:scale-105", "delay-800", "animate__animated", "animate__fadeIn", "animate__delay-" + (index + 1), "animate__slideInFromTop");
+
+      const checkbox = document.createElement('input');
+      checkbox.type = "checkbox";
+      checkbox.name = "file";
+      checkbox.value = fileName;
+      checkbox.checked = true;
+      checkbox.disabled = true;
+      listItem.appendChild(checkbox);
+
+      const textNode = document.createTextNode(formatFileName(fileName));
+      if (textNode) { // Only append text if it's not null
+        const textContainer = document.createElement('span');
+        textContainer.appendChild(textNode);
+        textContainer.classList.add("ml-2"); // Adding margin between checkbox and text
+        listItem.appendChild(textContainer);
+      }
+
+      const uploadButton = document.createElement('button');
+      uploadButton.textContent = "Upload";
+      uploadButton.classList.add("bg-blue-500", "hover:bg-blue-700", "text-white", "font-bold", "py-2", "px-4", "rounded", "transition", "duration-300", "ease-in-out", "mt-4", "ml-2", "inline-block");
+      uploadButton.style.marginTop = "1rem";
+
+      // Check if migration is needed for this module
+      const needsMigration = migratableModules.some(m => fileName.includes(m));
+      if (needsMigration) {
+        uploadButton.addEventListener('click', function() {
+          const fileInput = document.createElement('input');
+          fileInput.type = "file";
+          fileInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (!file) return;
+            // Handle file upload
+            console.log("Uploading file:", file);
+            if (fileName.includes("Citizens")) {
+              console.log("Citizens upload detected");
+            }
+            if (file.name === "saves.yml") {
+              const reader = new FileReader();
+              reader.onload = function(event) {
+                console.log(event.target.result);
+              };
+              reader.readAsText(file);
+            }
+          });
+          fileInput.click(); // Trigger file input click when button is clicked
+        });
+      } else {
+        uploadButton.textContent = "No migration needed";
+        uploadButton.disabled = true;
+      }
+
+      listItem.appendChild(uploadButton);
+
+      fileList.appendChild(listItem);
+    });
+  }
+
+  async function migrateFolder(zip) {
+    const topLevelFolders = Object.keys(zip.files);
+    const adaptersFolderName = topLevelFolders.find(folderName => folderName.endsWith('/adapters/'));
+    if (!adaptersFolderName) return []; // If adapters folder doesn't exist, return an empty array
+
+    const adaptersFolder = zip.folder(adaptersFolderName);
+    const files = [];
+    await adaptersFolder.forEach(async function(relativePath, zipEntry) {
+      if (!zipEntry.dir) { // If it's a file
+        files.push(zipEntry.name);
+      }
+    });
+
+    // Remove the first item from the array
+    files.shift();
+
+    return files;
+  }
+
+  function confirmFiles(files) {
+    const confirmedFiles = [];
+    if (files.length === 0) {
+      alert("No files found in the 'adapters' folder");
+      return Promise.resolve(confirmedFiles);
+    }
+
+    return new Promise(function(resolve) {
+      resolve(files);
+    });
+  }
+
+  function formatFileName(filePath) {
+    const formattedFileName = filePath.split('/').pop().replace(/\.jar$/i, '').replace(/([a-z])([A-Z])/g, '$1 $2').replace(/Adapter/g, '').trim();
+    return formattedFileName.includes("Basic") ? null : formattedFileName;
+  }
+
+  function checkIfMigrationNeeded(selectedModules) {
+    let migrationNeeded = false;
+
+    selectedModules.forEach(function(module) {
+      const needsMigration = migratableModules.some(m => module.includes(m));
+      if (!needsMigration) {
+        // Display a message indicating that migration is not needed for this module
+        const listItem = document.createElement('li');
+        listItem.innerHTML = `<span>${formatFileName(module)}</span><p class="text-red-600 ml-2">No migration needed for this adapter.</p>`;
+        document.getElementById('fileList').appendChild(listItem);
+      } else {
+        migrationNeeded = true;
+      }
+    });
+
+    if (migrationNeeded) {
+      // Display only the selected modules that need migration
+      displaySelectedModules(selectedModules);
+    } else {
+      // Display a message indicating that migration is not needed for any selected modules
+      document.getElementById('uploadArea').innerHTML = '<p class="text-xl font-semibold text-red-600">No migration needed for any selected adapters.</p>';
+    }
+  }
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
 </body>
 </html>
