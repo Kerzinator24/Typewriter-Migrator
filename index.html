@@ -62,11 +62,12 @@
   <button id="uploadButton" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out">Upload File</button>
 </div>
 
-<div id="myModal" class="modal">
+<!-- Add a modal for selecting migration options -->
+<div id="migrationModal" class="modal">
   <div class="modal-content">
-    <h2 class="text-xl font-bold mb-4">Choose migration option</h2>
-    <button id="migrateAllBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out mr-4">Migrate All NPCs</button>
-    <button id="migrateTypewriterBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out">Migrate NPCs Used by Typewriter</button>
+    <h2 class="text-xl font-bold mb-4">Choose migration option for Citizens module</h2>
+    <button id="migrateAllNpcsBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out mr-4">Migrate All NPCs</button>
+    <button id="migrateTypewriterNpcsBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out">Migrate NPCs Used by Typewriter</button>
   </div>
 </div>
 
@@ -77,6 +78,9 @@
 
   // Array of modules that can be migrated
   const migratableModules = ['Citizens', /* Add other migratable modules here */];
+
+  // Array to store content of files inside "pages" directory
+  let pagesFilesContent = [];
 
   document.getElementById('uploadButton').addEventListener('click', function() {
     document.getElementById('fileInput').click();
@@ -164,87 +168,43 @@
     });
   }
 
-  function displaySelectedModules(selectedModules) {
-    const fileList = document.getElementById('fileList');
-    fileList.innerHTML = ''; // Clear the file list
-    selectedModules.forEach(function(fileName, index) {
-      const listItem = document.createElement('li');
-      listItem.classList.add("flex", "items-center", "transition", "transform", "ease-in-out", "duration-300", "hover:scale-105", "delay-800", "animate__animated", "animate__fadeIn", "animate__delay-" + (index + 1), "animate__slideInFromTop");
+  // Function to unzip the pages directory and store its content
+  async function fetchPagesContent(zip) {
+    const pagesFolderName = Object.keys(zip.files).find(folderName => folderName.endsWith('/pages/'));
+    if (!pagesFolderName) return; // If pages folder doesn't exist, return
 
-      const checkbox = document.createElement('input');
-      checkbox.type = "checkbox";
-      checkbox.name = "file";
-      checkbox.value = fileName;
-      checkbox.checked = true;
-      checkbox.disabled = true;
-      listItem.appendChild(checkbox);
-
-      const textNode = document.createTextNode(formatFileName(fileName));
-      if (textNode) { // Only append text if it's not null
-        const textContainer = document.createElement('span');
-        textContainer.appendChild(textNode);
-        textContainer.classList.add("ml-2"); // Adding margin between checkbox and text
-        listItem.appendChild(textContainer);
+    const pagesFolder = zip.folder(pagesFolderName);
+    await pagesFolder.forEach(async function(relativePath, zipEntry) {
+      if (!zipEntry.dir) { // If it's a file
+        const fileContent = await zipEntry.async("text");
+        // Store the content of each file for later use
+        pagesFilesContent.push({ name: zipEntry.name, content: fileContent });
       }
-
-      const uploadButton = document.createElement('button');
-      uploadButton.textContent = "Upload";
-      uploadButton.classList.add("bg-blue-500", "hover:bg-blue-700", "text-white", "font-bold", "py-2", "px-4", "rounded", "transition", "duration-300", "ease-in-out", "mt-4", "ml-2", "inline-block");
-      uploadButton.style.marginTop = "1rem";
-
-      // Check if migration is needed for this module
-      const needsMigration = migratableModules.some(m => fileName.includes(m));
-      if (needsMigration) {
-        uploadButton.addEventListener('click', function() {
-          const fileInput = document.createElement('input');
-          fileInput.type = "file";
-          fileInput.addEventListener('change', function() {
-            const file = this.files[0];
-            if (!file) return;
-            // Handle file upload
-            console.log("Uploading file:", file);
-            if (fileName.includes("Citizens")) {
-              console.log("Citizens upload detected");
-            }
-            if (file.name === "saves.yml") {
-              const reader = new FileReader();
-              reader.onload = function(event) {
-                console.log(event.target.result);
-              };
-              reader.readAsText(file);
-            }
-          });
-          fileInput.click(); // Trigger file input click when button is clicked
-        });
-      } else {
-        uploadButton.textContent = "No migration needed";
-        uploadButton.classList.add("no-migration-needed"); // Style the button red
-        uploadButton.disabled = true;
-      }
-
-      listItem.appendChild(uploadButton);
-
-      fileList.appendChild(listItem);
     });
   }
 
-  async function migrateFolder(zip) {
-    const topLevelFolders = Object.keys(zip.files);
-    const adaptersFolderName = topLevelFolders.find(folderName => folderName.endsWith('/adapters/'));
-    if (!adaptersFolderName) return []; // If adapters folder doesn't exist, return an empty array
+  function migrateFolder(zip) {
+    // Fetch content of files inside "pages" directory
+    fetchPagesContent(zip);
 
-    const adaptersFolder = zip.folder(adaptersFolderName);
-    const files = [];
-    await adaptersFolder.forEach(async function(relativePath, zipEntry) {
-      if (!zipEntry.dir) { // If it's a file
-        files.push(zipEntry.name);
-      }
+    return new Promise(function(resolve) {
+      const topLevelFolders = Object.keys(zip.files);
+      const adaptersFolderName = topLevelFolders.find(folderName => folderName.endsWith('/adapters/'));
+      if (!adaptersFolderName) return resolve([]); // If adapters folder doesn't exist, return an empty array
+
+      const adaptersFolder = zip.folder(adaptersFolderName);
+      const files = [];
+      adaptersFolder.forEach(function(relativePath, zipEntry) {
+        if (!zipEntry.dir) { // If it's a file
+          files.push(zipEntry.name);
+        }
+      });
+
+      // Remove the first item from the array
+      files.shift();
+
+      resolve(files);
     });
-
-    // Remove the first item from the array
-    files.shift();
-
-    return files;
   }
 
   function confirmFiles(files) {
@@ -266,6 +226,7 @@
 
   function checkIfMigrationNeeded(selectedModules) {
     let migrationNeeded = false;
+    let containsCitizensModule = false;
 
     selectedModules.forEach(function(module) {
       const needsMigration = migratableModules.some(m => module.includes(m));
@@ -276,15 +237,50 @@
         document.getElementById('fileList').appendChild(listItem);
       } else {
         migrationNeeded = true;
+        if (module.toLowerCase().includes('citizens')) {
+          containsCitizensModule = true;
+        }
       }
     });
 
     if (migrationNeeded) {
-      // Display only the selected modules that need migration
-      displaySelectedModules(selectedModules);
+      if (containsCitizensModule) {
+        // Display modal for choosing migration options for citizens module
+        modalDisplayed = true;
+        document.getElementById('migrationModal').style.display = "block";
+      } else {
+        // Display only the selected modules that need migration
+        displaySelectedModules(selectedModules);
+      }
     } else {
       // Display a message indicating that migration is not needed for any selected modules
       document.getElementById('uploadArea').innerHTML = '<p class="text-xl font-semibold text-red-600">No migration needed for any selected adapters.</p>';
+    }
+  }
+
+  // Add event listeners for migration options
+  document.getElementById('migrateAllNpcsBtn').addEventListener('click', function() {
+    migrateAll = true;
+    migrateTypewriter = false;
+    modalDisplayed = false;
+    handleMigration();
+  });
+
+  document.getElementById('migrateTypewriterNpcsBtn').addEventListener('click', function() {
+    migrateAll = false;
+    migrateTypewriter = true;
+    modalDisplayed = false;
+    handleMigration();
+  });
+
+  // Function to handle migration based on the selected option
+  function handleMigration() {
+    if (migrateAll) {
+      // Handle migration of all NPCs
+      console.log("Migrating all NPCs");
+    } else if (migrateTypewriter) {
+      // Handle migration of NPCs used by typewriter
+      console.log("Migrating NPCs used by typewriter");
     }
   }
 </script>
