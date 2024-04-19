@@ -6,6 +6,7 @@
   <title>Typewriter Auto-Migration Tool</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <style>
+    /* Styling for keyframe animations */
     @keyframes slideInFromTop {
       from {
         opacity: 0;
@@ -26,6 +27,7 @@
       }
     }
 
+    /* Styling for modal */
     .modal {
       display: none;
       position: fixed;
@@ -82,10 +84,12 @@
   // Array to store content of files inside "pages" directory
   let pagesFilesContent = [];
 
+  // Event listener for the upload button
   document.getElementById('uploadButton').addEventListener('click', function() {
     document.getElementById('fileInput').click();
   });
 
+  // Event listener for file input change
   document.getElementById('fileInput').addEventListener('change', function() {
     const file = this.files[0];
     if (!file) return;
