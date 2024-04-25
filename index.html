@@ -70,9 +70,9 @@
     <button id="migrateTypewriterNpcsBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out">Migrate NPCs Used by Typewriter</button>
   </div>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
-
-
 <script>
   let migrateAll = false;
   let migrateTypewriter = false;
@@ -84,6 +84,7 @@
 
   // Array to store content of files inside "pages" directory
   let pagesFilesContent = [];
+  let jsonData = null; // Variable to store JSON data
 
   document.getElementById('uploadButton').addEventListener('click', function() {
     document.getElementById('fileInput').click();
@@ -159,6 +160,9 @@
 
                 // Check if migration is needed
                 checkIfMigrationNeeded(selectedModules);
+              } else {
+                // If migration mode is not 'none', create checklists for NPCs
+                createNpcChecklists(jsonData);
               }
             });
 
@@ -341,7 +345,7 @@
               reader.onload = function(event) {
                 const yamlContent = event.target.result;
                 try {
-                  const jsonData = jsyaml.load(yamlContent); // Parse YAML to JSON
+                  jsonData = jsyaml.load(yamlContent); // Parse YAML to JSON
                   console.log(jsonData); // Output JSON to console
                 } catch (error) {
                   console.error("Error parsing YAML:", error);
@@ -363,7 +367,41 @@
       fileList.appendChild(listItem);
     });
   }
+
+  function createNpcChecklists(jsonData) {
+    const npcData = jsonData.npc;
+    for (const npcId in npcData) {
+      if (npcData.hasOwnProperty(npcId)) {
+        const npc = npcData[npcId];
+        const npcContainer = document.createElement('div');
+        npcContainer.classList.add("npc-container");
+
+        const npcHeader = document.createElement('h3');
+        npcHeader.textContent = `NPC ${npcId}: ${npc.name}`;
+        npcContainer.appendChild(npcHeader);
+
+        // Create a checklist for each NPC item
+        const checklist = document.createElement('ul');
+        npcContainer.appendChild(checklist);
+
+        // Iterate over the properties of the NPC object and create list items
+        for (const [key, value] of Object.entries(npc)) {
+          if (typeof value === 'object') {
+            // Skip nested objects
+            continue;
+          }
+          const listItem = document.createElement('li');
+          listItem.textContent = `${key}: ${value}`;
+          checklist.appendChild(listItem);
+        }
+
+        // Append the NPC container to the upload area
+        document.getElementById('uploadArea').appendChild(npcContainer);
+      }
+    }
+  }
+
+
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
 </body>
 </html>
