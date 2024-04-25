@@ -6,7 +6,6 @@
   <title>Typewriter Auto-Migration Tool</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <style>
-    /* Styling for keyframe animations */
     @keyframes slideInFromTop {
       from {
         opacity: 0;
@@ -27,7 +26,6 @@
       }
     }
 
-    /* Styling for modal */
     .modal {
       display: none;
       position: fixed;
@@ -72,11 +70,14 @@
     <button id="migrateTypewriterNpcsBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out">Migrate NPCs Used by Typewriter</button>
   </div>
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+
 
 <script>
   let migrateAll = false;
   let migrateTypewriter = false;
-  let modalDisplayed = false;
+  let MigrationMode = 'none'; // Default value
+  let modalDisplayed = false; // Variable to track modal display state
 
   // Array of modules that can be migrated
   const migratableModules = ['Citizens', /* Add other migratable modules here */];
@@ -84,12 +85,10 @@
   // Array to store content of files inside "pages" directory
   let pagesFilesContent = [];
 
-  // Event listener for the upload button
   document.getElementById('uploadButton').addEventListener('click', function() {
     document.getElementById('fileInput').click();
   });
 
-  // Event listener for file input change
   document.getElementById('fileInput').addEventListener('change', function() {
     const file = this.files[0];
     if (!file) return;
@@ -148,10 +147,10 @@
             });
 
             const confirmButton = document.createElement('button');
-            confirmButton.textContent = "Confirm";
+            confirmButton.textContent = "Continue";
             confirmButton.classList.add("bg-blue-500", "hover:bg-blue-700", "text-white", "font-bold", "py-2", "px-4", "rounded", "transition", "duration-300", "ease-in-out", "mt-4", "inline-block");
             confirmButton.addEventListener('click', function() {
-              if (!modalDisplayed) {
+              if (!modalDisplayed && MigrationMode === 'none') {
                 const checkedFiles = Array.from(document.querySelectorAll('input[name="file"]:checked')).map(function(checkbox) {
                   return checkbox.value;
                 });
@@ -174,7 +173,8 @@
 
   // Function to unzip the pages directory and store its content
   async function fetchPagesContent(zip) {
-    const pagesFolderName = Object.keys(zip.files).find(folderName => folderName.endsWith('/pages/'));
+    const topLevelFolders = Object.keys(zip.files);
+    const pagesFolderName = topLevelFolders.find(folderName => folderName.endsWith('/pages/'));
     if (!pagesFolderName) return; // If pages folder doesn't exist, return
 
     const pagesFolder = zip.folder(pagesFolderName);
@@ -230,7 +230,6 @@
 
   function checkIfMigrationNeeded(selectedModules) {
     let migrationNeeded = false;
-    let containsCitizensModule = false;
 
     selectedModules.forEach(function(module) {
       const needsMigration = migratableModules.some(m => module.includes(m));
@@ -241,51 +240,128 @@
         document.getElementById('fileList').appendChild(listItem);
       } else {
         migrationNeeded = true;
-        if (module.toLowerCase().includes('citizens')) {
-          containsCitizensModule = true;
+        // Check if Citizens module is selected, if so, display the migration modal
+        if (module.includes('Citizens')) {
+          displayMigrationModal();
         }
       }
     });
 
     if (migrationNeeded) {
-      if (containsCitizensModule) {
-        // Display modal for choosing migration options for citizens module
-        modalDisplayed = true;
-        document.getElementById('migrationModal').style.display = "block";
-      } else {
-        // Display only the selected modules that need migration
-        displaySelectedModules(selectedModules);
-      }
+      // Display only the selected modules that need migration
+      displaySelectedModules(selectedModules);
     } else {
       // Display a message indicating that migration is not needed for any selected modules
       document.getElementById('uploadArea').innerHTML = '<p class="text-xl font-semibold text-red-600">No migration needed for any selected adapters.</p>';
     }
   }
 
-  // Add event listeners for migration options
-  document.getElementById('migrateAllNpcsBtn').addEventListener('click', function() {
+  // Function to display the modal if the selected modules include Citizens
+  function displayMigrationModal() {
+    const modal = document.getElementById('migrationModal');
+    modal.style.display = "block";
+    modalDisplayed = true;
+
+    // Add event listeners to the modal buttons
+    document.getElementById('migrateAllNpcsBtn').addEventListener('click', function() {
+      MigrationMode = 'all'; // Set MigrationMode to 'all'
+      closeModal();
+    });
+
+    document.getElementById('migrateTypewriterNpcsBtn').addEventListener('click', function() {
+      MigrationMode = 'typewriterOnly'; // Set MigrationMode to 'typewriterOnly'
+      closeModal();
+    });
+  }
+
+  // Function to close the modal
+  function closeModal() {
+    const modal = document.getElementById('migrationModal');
+    modal.style.display = "none";
+    modalDisplayed = false;
+  }
+
+  // Function to migrate all NPCs
+  function migrateAllNpcs() {
     migrateAll = true;
-    migrateTypewriter = false;
-    modalDisplayed = false;
-    handleMigration();
-  });
+    closeModal();
+  }
 
-  document.getElementById('migrateTypewriterNpcsBtn').addEventListener('click', function() {
-    migrateAll = false;
+  // Function to migrate NPCs used by Typewriter
+  function migrateTypewriterNpcs() {
     migrateTypewriter = true;
-    modalDisplayed = false;
-    handleMigration();
-  });
+    closeModal();
+  }
 
-  // Function to handle migration based on the selected option
-  function handleMigration() {
-    if (migrateAll) {
-      // Handle migration of all NPCs
-      console.log("Migrating all NPCs");
-    } else if (migrateTypewriter) {
-      // Handle migration of NPCs used by typewriter
-      console.log("Migrating NPCs used by typewriter");
-    }
+  // Function to display selected modules
+  function displaySelectedModules(selectedModules) {
+    const fileList = document.getElementById('fileList');
+    fileList.innerHTML = ''; // Clear the file list
+    selectedModules.forEach(function(fileName, index) {
+      const listItem = document.createElement('li');
+      listItem.classList.add("flex", "items-center", "transition", "transform", "ease-in-out", "duration-300", "hover:scale-105", "delay-800", "animate__animated", "animate__fadeIn", "animate__delay-" + (index + 1), "animate__slideInFromTop");
+
+      const checkbox = document.createElement('input');
+      checkbox.type = "checkbox";
+      checkbox.name = "file";
+      checkbox.value = fileName;
+      checkbox.checked = true;
+      checkbox.disabled = true;
+      listItem.appendChild(checkbox);
+
+      const textNode = document.createTextNode(formatFileName(fileName));
+      if (textNode) { // Only append text if it's not null
+        const textContainer = document.createElement('span');
+        textContainer.appendChild(textNode);
+        textContainer.classList.add("ml-2"); // Adding margin between checkbox and text
+        listItem.appendChild(textContainer);
+      }
+
+      const uploadButton = document.createElement('button');
+      uploadButton.textContent = "Upload";
+      uploadButton.classList.add("bg-blue-500", "hover:bg-blue-700", "text-white", "font-bold", "py-2", "px-4", "rounded", "transition", "duration-300", "ease-in-out", "mt-4", "ml-2", "inline-block");
+      uploadButton.style.marginTop = "1rem";
+
+      // Check if migration is needed for this module
+      const needsMigration = migratableModules.some(m => fileName.includes(m));
+      if (needsMigration) {
+        uploadButton.addEventListener('click', function() {
+          const fileInput = document.createElement('input');
+          fileInput.type = "file";
+          fileInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (!file) return;
+            // Handle file upload
+            console.log("Uploading file:", file);
+            if (fileName.includes("Citizens")) {
+              console.log("Citizens upload detected");
+            }
+            if (file.name === "saves.yml") {
+              const reader = new FileReader();
+              reader.onload = function(event) {
+                const yamlContent = event.target.result;
+                try {
+                  const jsonData = jsyaml.load(yamlContent); // Parse YAML to JSON
+                  console.log(jsonData); // Output JSON to console
+                } catch (error) {
+                  console.error("Error parsing YAML:", error);
+                }
+              };
+              reader.readAsText(file);
+            }
+          });
+          fileInput.click(); // Trigger file input click when button is clicked
+        });
+      } else {
+        uploadButton.textContent = "No migration needed";
+        uploadButton.classList.add("no-migration-needed"); // Style the button red
+        uploadButton.disabled = true;
+      }
+
+      listItem.appendChild(uploadButton);
+
+      fileList.appendChild(listItem);
+    });
   }
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
