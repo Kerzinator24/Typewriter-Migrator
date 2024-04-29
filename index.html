@@ -53,11 +53,26 @@
     .no-migration-needed {
       color: red;
     }
+
+    .scrollable {
+      max-height: 200em; /* Set the maximum height */
+      justify-content: center; /* Center the content */
+      overflow-y: auto; /* Enable vertical scrolling */
+    }
+    .npc-info-container {
+      display: flex;
+      align-items: center;
+    }
+
+    .npc-container {
+      margin-bottom: 20px;
+    }
+
   </style>
 </head>
 <body class="bg-gray-100 flex flex-col items-center justify-center h-screen">
 <h1 class="text-4xl font-bold mb-8">Typewriter Auto-Migration Tool</h1>
-<div id="uploadArea">
+<div id="uploadArea"  class="scrollable">
   <input type="file" id="fileInput" class="hidden">
   <button id="uploadButton" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out">Upload File</button>
 </div>
@@ -70,6 +85,18 @@
     <button id="migrateTypewriterNpcsBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out">Migrate NPCs Used by Typewriter</button>
   </div>
 </div>
+
+<!-- Add a modal for displaying NPC checklist -->
+<div id="npcModal" class="modal">
+  <div class="modal-content">
+    <h2 class="text-xl font-bold mb-4">Select NPCs to Migrate</h2>
+    <div id="npcList" class="scrollable">
+      <!-- NPC checkboxes will be appended here -->
+    </div>
+    <button id="confirmNpcSelection" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out mt-4">Confirm Selection</button>
+  </div>
+</div>
+
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
@@ -340,7 +367,7 @@
             if (fileName.includes("Citizens")) {
               console.log("Citizens upload detected");
             }
-            if (file.name === "saves.yml") {
+            if (file.name === "saves 2.yml") {
               const reader = new FileReader();
               reader.onload = function(event) {
                 const yamlContent = event.target.result;
@@ -370,37 +397,139 @@
 
   function createNpcChecklists(jsonData) {
     const npcData = jsonData.npc;
+    const npcModal = document.getElementById('npcModal');
+    const npcList = document.getElementById('npcList');
+    const npcHoverStates = {};
+
+
+    // Clear previous NPC list
+    npcList.innerHTML = '';
+
     for (const npcId in npcData) {
       if (npcData.hasOwnProperty(npcId)) {
         const npc = npcData[npcId];
         const npcContainer = document.createElement('div');
         npcContainer.classList.add("npc-container");
 
-        const npcHeader = document.createElement('h3');
-        npcHeader.textContent = `NPC ${npcId}: ${npc.name}`;
-        npcContainer.appendChild(npcHeader);
+        const npcInfoContainer = document.createElement('div');
+        npcInfoContainer.classList.add("npc-info-container");
 
-        // Create a checklist for each NPC item
-        const checklist = document.createElement('ul');
-        npcContainer.appendChild(checklist);
+        // Create a checkbox for the NPC
+        const checkbox = document.createElement('input');
+        checkbox.type = "checkbox";
+        checkbox.name = "npc-checkbox";
+        checkbox.value = npcId;
 
-        // Iterate over the properties of the NPC object and create list items
-        for (const [key, value] of Object.entries(npc)) {
-          if (typeof value === 'object') {
-            // Skip nested objects
-            continue;
-          }
-          const listItem = document.createElement('li');
-          listItem.textContent = `${key}: ${value}`;
-          checklist.appendChild(listItem);
+        // Determine if all NPCs should be selected based on migration mode
+        if (MigrationMode === 'all') {
+          checkbox.checked = true;
         }
 
-        // Append the NPC container to the upload area
-        document.getElementById('uploadArea').appendChild(npcContainer);
+        // Append the checkbox to the NPC info container
+        npcInfoContainer.appendChild(checkbox);
+
+        // Base64 decode the textureRaw property if it exists
+        if (npc.traits && npc.traits.skintrait && npc.traits.skintrait.textureRaw) {
+          const textureRaw = atob(npc.traits.skintrait.textureRaw);
+          try {
+            const textures = JSON.parse(textureRaw);
+            const headUrl = textures.textures.SKIN.url.replace("http://textures.minecraft.net/texture/", "https://nmsr.nickac.dev/head/");
+            const fullBodyUrl = textures.textures.SKIN.url.replace("http://textures.minecraft.net/texture/", "https://nmsr.nickac.dev/fullbody/");
+
+            // Create an image element for the NPC's head
+            const npcImage = document.createElement('img');
+            npcImage.src = headUrl;
+            npcImage.alt = `NPC ${npcId} Head`;
+
+            // Apply CSS styling to adjust the size of the image and transition effect
+            npcImage.classList.add('npc-image');
+            npcImage.style.width = "50px"; // Set initial width
+            npcImage.style.height = "auto"; // Maintain aspect ratio
+            npcImage.style.transition = "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out"; // Add transition effect with delay for translateY
+
+            // Apply CSS styling to adjust the size and position of the image and transition effect
+            npcImage.classList.add('npc-image');
+            npcImage.style.width = "50px"; // Set initial width
+            npcImage.style.height = "auto"; // Maintain aspect ratio
+            npcImage.style.transition = "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out"; // Add transition effect with delay for translateY
+
+            // Add event listeners for hover behavior on the entire NPC container
+            npcContainer.addEventListener('mouseenter', function() {
+              // Delay the switch to full body and increase size
+              setTimeout(function() {
+                npcImage.src = fullBodyUrl; // Change the image source to full-body version
+                npcImage.style.width = "100px"; // Decrease width
+              }, ); // Delay for 500 milliseconds
+            });
+
+            npcContainer.addEventListener('mouseleave', function() {
+              // Reset transform and size
+              npcImage.style.transform = "translateY(0)";
+              npcImage.src = headUrl; // Change back to head version
+              npcImage.style.width = "50px"; // Reset width
+            });
+
+            // Append the image to the NPC info container
+            npcInfoContainer.appendChild(npcImage);
+          } catch (error) {
+            console.error('Error parsing textureRaw JSON:', error);
+          }
+        }
+
+        // Create an unordered list for NPC details
+        const detailsList = document.createElement('ul');
+
+        // Add world and coordinates as bullet points
+        const worldItem = document.createElement('li');
+        worldItem.textContent = `World: ${npc.traits.location.world}`;
+
+        const xCoordItem = document.createElement('li');
+        xCoordItem.textContent = `X: ${npc.traits.location.x}`;
+
+        const yCoordItem = document.createElement('li');
+        yCoordItem.textContent = `Y: ${npc.traits.location.y}`;
+
+        const zCoordItem = document.createElement('li');
+        zCoordItem.textContent = `Z: ${npc.traits.location.z}`;
+
+        // Append details to the list
+        detailsList.appendChild(worldItem);
+        detailsList.appendChild(xCoordItem);
+        detailsList.appendChild(yCoordItem);
+        detailsList.appendChild(zCoordItem);
+
+        // Append the details list to the NPC info container
+        npcInfoContainer.appendChild(detailsList);
+
+        // Create a label for the NPC name
+        const nameLabel = document.createElement('label');
+        nameLabel.textContent = `NPC ${npcId}: ${npc.name}`;
+
+        // Append the name label to the NPC info container
+        npcInfoContainer.appendChild(nameLabel);
+
+        // Append the NPC info container to the NPC container
+        npcContainer.appendChild(npcInfoContainer);
+
+        // Append the NPC container to the NPC list
+        npcList.appendChild(npcContainer);
       }
     }
-  }
 
+    // Display the modal
+    npcModal.style.display = "block";
+    modalDisplayed = true;
+
+    // Add event listener to the confirm selection button
+    document.getElementById('confirmNpcSelection').addEventListener('click', function() {
+      // Close the modal
+      npcModal.style.display = "none";
+      modalDisplayed = false;
+
+      // Process the selected NPCs
+      processSelectedNPCs();
+    });
+    }
 
 </script>
 </body>
