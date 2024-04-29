@@ -553,78 +553,77 @@
       selectedNPCs.forEach(npc => {
         const npcId = npc.value;
         const npcData = jsonData.npc[npcId];
-        const npcName = npcData.name;
 
-        // Generate hashed ID for definition and instance with "i" and "d" prefixes
-        const definitionId = generateHash({ id: npcId, name: npcName }, "d");
-        const instanceId = generateHash({ id: npcId, name: npcName }, "i");
+        // Check if NPC type is "PLAYER"
+        if (npcData.traits.type === "PLAYER") {
+          const npcName = npcData.name;
 
+          // Generate hashed ID for definition and instance with "i" and "d" prefixes
+          const definitionId = generateHash({ id: npcId, name: npcName }, "d");
+          const instanceId = generateHash({ id: npcId, name: npcName }, "i");
 
-        // Extract texture and signature from NPC data
-        const texture = npcData.traits.skintrait.textureRaw;
-        const signature = npcData.traits.skintrait.signature;
+          // Extract NPC traits with default values if missing
+          const traits = npcData.traits || {};
+          const skintrait = traits.skintrait || {};
+          const location = traits.location || {};
 
-        // Extract world, coordinates, yaw, and pitch from NPC data
-        const world = npcData.traits.location.world;
-        const xCoord = npcData.traits.location.x;
-        const yCoord = npcData.traits.location.y;
-        const zCoord = npcData.traits.location.z;
-        const yaw = npcData.traits.location.yaw;
-        const pitch = npcData.traits.location.pitch;
+          // Create JSON object for NPC data
+          const npcObject = {
+            name: npcName,
+            type: "manifest",
+            entries: [
+              {
+                id: definitionId,
+                name: npcName + "_definition",
+                displayName: npcName,
+                sound: {
+                  soundId: { type: "default", value: "" },
+                  soundSource: { type: "self", entryId: "", location: { world: "", x: 0, y: 0, z: 0, yaw: 0, pitch: 0 } },
+                  track: "MASTER",
+                  volume: 0,
+                  pitch: 0
+                },
+                skin: {
+                  texture: skintrait.textureRaw || "",
+                  signature: skintrait.signatureRaw || ""
+                },
+                data: [],
+                type: "npc_definition"
+              },
+              {
+                id: instanceId,
+                name: npcName + "_instance",
+                definition: definitionId,
+                spawnLocation: {
+                  world: location.world || "",
+                  x: location.x || 0,
+                  y: location.y || 0,
+                  z: location.z || 0,
+                  yaw: location.yaw || 0,
+                  pitch: location.pitch || 0
+                },
+                data: [],
+                activities: [],
+                type: "npc_instance"
+              }
+            ],
+            chapter: "migrated",
+            priority: 0,
+            version: "0.5.0-beta-79"
+          };
 
+          // Create a Blob object containing the JSON data
+          const blob = new Blob([JSON.stringify(npcObject, null, 2)], { type: "application/json" });
 
-        // Construct NPC definition
-        const npcDefinition = {
-          id: definitionId,
-          name: `${npcName}_definition`,
-          displayName: npcName,
-          sound: {
-            soundId: { type: "default", value: "" },
-            soundSource: { type: "self", entryId: "", location: { world: "", x: 0, y: 0, z: 0, yaw: 0, pitch: 0 } },
-            track: "MASTER",
-            volume: 0,
-            pitch: 0
-          },
-          skin: {
-            texture: texture, // Texture fetched from NPC data
-            signature: signature // Signature fetched from NPC data
-          },
-          data: [],
-          type: "npc_definition"
-        };
-
-        // Construct NPC instance
-        const npcInstance = {
-          id: instanceId,
-          name: `${npcName}_instance`,
-          definition: definitionId,
-          spawnLocation: {
-            world: world, // World fetched from NPC data
-            x: xCoord, // X coordinate fetched from NPC data
-            y: yCoord, // Y coordinate fetched from NPC data
-            z: zCoord, // Z coordinate fetched from NPC data
-            yaw: yaw, // Yaw fetched from NPC data
-            pitch: pitch // Pitch fetched from NPC data
-          },
-          data: [],
-          activities: [],
-          type: "npc_instance"
-        };
-
-        // Construct final NPC object
-        const npcObject = {
-          name: npcName,
-          type: "manifest",
-          entries: [npcDefinition, npcInstance],
-          chapter: "migrated",
-          priority: 0,
-          version: "0.5.0-beta-79"
-        };
-
-        // Output NPC object to console
-        console.log(JSON.stringify(npcObject, null, 2));
+          // Create a download link
+          const downloadLink = document.createElement("a");
+          downloadLink.href = URL.createObjectURL(blob);
+          downloadLink.download = npcName + ".json";
+          downloadLink.click();
+        }
       });
     }
+
 
 
   }
