@@ -564,11 +564,12 @@
         const skintrait = traits.skintrait || {};
         const location = traits.location || {};
 
+        let npcObject;
+
         // Check if NPC type is "PLAYER"
         if (npcData.traits.type === "PLAYER") {
-
-          // Create JSON object for NPC data
-          const npcObject = {
+          // Create JSON object for PLAYER NPC data
+          npcObject = {
             name: npcName,
             type: "manifest",
             entries: [
@@ -611,22 +612,64 @@
             priority: 0,
             version: "0.5.0-beta-79"
           };
-
-          // Create a Blob object containing the JSON data
-          const blob = new Blob([JSON.stringify(npcObject, null, 2)], { type: "application/json" });
-
-          // Create a download link
-          const downloadLink = document.createElement("a");
-          downloadLink.href = URL.createObjectURL(blob);
-          downloadLink.download = npcName + ".json";
-          downloadLink.click();
+        } else if (npcData.traits.type === "VILLAGER") {
+          // Create JSON object for VILLAGER NPC data
+          npcObject = {
+            name: npcName,
+            type: "manifest",
+            entries: [
+              {
+                id: definitionId,
+                name: npcName + "_definition",
+                displayName: npcName,
+                sound: {
+                  soundId: { type: "default", value: "" },
+                  soundSource: { type: "self", entryId: "", location: { world: "", x: 0, y: 0, z: 0, yaw: 0, pitch: 0 } },
+                  track: "MASTER",
+                  volume: 0,
+                  pitch: 0
+                },
+                skin: {
+                  texture: skintrait.textureRaw || "",
+                  signature: skintrait.signatureRaw || ""
+                },
+                data: [],
+                type: "npc_definition"
+              },
+              {
+                id: instanceId,
+                name: npcName + "_instance",
+                definition: definitionId,
+                spawnLocation: {
+                  world: location.world || "world",
+                  x: location.x || 0,
+                  y: location.y || 0,
+                  z: location.z || 0,
+                  yaw: location.yaw || 0,
+                  pitch: location.pitch || 0
+                },
+                data: [],
+                activities: [],
+                type: "npc_instance"
+              }
+            ],
+            chapter: "migrated",
+            priority: 0,
+            version: "0.5.0-beta-79"
+          };
         }
-        else if (npcData.traits.type === "VILLAGER") {
-          
-        }
-          
+
+        // Create a Blob object containing the JSON data
+        const blob = new Blob([JSON.stringify(npcObject, null, 2)], { type: "application/json" });
+
+        // Create a download link
+        const downloadLink = document.createElement("a");
+        downloadLink.href = URL.createObjectURL(blob);
+        downloadLink.download = npcName + ".json";
+        downloadLink.click();
       });
     }
+
 
 
 
