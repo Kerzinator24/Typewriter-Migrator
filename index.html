@@ -553,19 +553,19 @@
       selectedNPCs.forEach(npc => {
         const npcId = npc.value;
         const npcData = jsonData.npc[npcId];
+        const npcName = npcData.name;
+
+        // Generate hashed ID for definition and instance with "i" and "d" prefixes
+        const definitionId = generateHash({ id: npcId, name: npcName }, "d");
+        const instanceId = generateHash({ id: npcId, name: npcName }, "i");
+
+        // Extract NPC traits with default values if missing
+        const traits = npcData.traits || {};
+        const skintrait = traits.skintrait || {};
+        const location = traits.location || {};
 
         // Check if NPC type is "PLAYER"
         if (npcData.traits.type === "PLAYER") {
-          const npcName = npcData.name;
-
-          // Generate hashed ID for definition and instance with "i" and "d" prefixes
-          const definitionId = generateHash({ id: npcId, name: npcName }, "d");
-          const instanceId = generateHash({ id: npcId, name: npcName }, "i");
-
-          // Extract NPC traits with default values if missing
-          const traits = npcData.traits || {};
-          const skintrait = traits.skintrait || {};
-          const location = traits.location || {};
 
           // Create JSON object for NPC data
           const npcObject = {
@@ -595,7 +595,7 @@
                 name: npcName + "_instance",
                 definition: definitionId,
                 spawnLocation: {
-                  world: location.world || "",
+                  world: location.world || "world",
                   x: location.x || 0,
                   y: location.y || 0,
                   z: location.z || 0,
@@ -621,6 +621,10 @@
           downloadLink.download = npcName + ".json";
           downloadLink.click();
         }
+        else if (npcData.traits.type === "VILLAGER") {
+          
+        }
+          
       });
     }
 
