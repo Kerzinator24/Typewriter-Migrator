@@ -367,7 +367,7 @@
             if (fileName.includes("Citizens")) {
               console.log("Citizens upload detected");
             }
-            if (file.name === "saves 2.yml") {
+            if (file.name === "saves.yml") {
               const reader = new FileReader();
               reader.onload = function(event) {
                 const yamlContent = event.target.result;
@@ -561,13 +561,14 @@
 
         // Extract NPC traits with default values if missing
         const traits = npcData.traits || {};
-        const skintrait = traits.skintrait || {};
         const location = traits.location || {};
 
         let npcObject;
 
         // Check if NPC type is "PLAYER"
         if (npcData.traits.type === "PLAYER") {
+          // Extract relevant traits
+          const skintrait = traits.skintrait || {};
           // Create JSON object for PLAYER NPC data
           npcObject = {
             name: npcName,
@@ -612,15 +613,52 @@
             priority: 0,
             version: "0.5.0-beta-79"
           };
-        } else if (npcData.traits.type === "VILLAGER") {
-          // Create JSON object for VILLAGER NPC data
+        } else {
+          // Extract relevant traits
+          const villagerType = traits.villagertrait.type || "";
+          const profession = traits.profession || "";
+          const level = npcData.traits.villagertrait ? mapVillagerLevel(npcData.traits.villagertrait.level) : "";
+          // Function to map villager level number to string
+          function mapVillagerLevel(level) {
+            switch (parseInt(level)) {
+              case 1:
+                return "NOVICE";
+              case 2:
+                return "APPRENTICE";
+              case 3:
+                return "JOURNEYMAN";
+              case 4:
+                return "EXPERT";
+              case 5:
+                return "MASTER";
+              default:
+                return "";
+            }
+          }
+          // Create JSON object for NPC data
           npcObject = {
-            name: npcName,
+            name: npcName.toLowerCase(),
             type: "manifest",
             entries: [
               {
+                id: instanceId,
+                name: npcName.toLowerCase() + "_instance",
+                definition: definitionId,
+                spawnLocation: {
+                  world: traits.location.world || "",
+                  x: parseFloat(traits.location.x) || 0,
+                  y: parseFloat(traits.location.y) || 0,
+                  z: parseFloat(traits.location.z) || 0,
+                  yaw: parseFloat(traits.location.yaw) || 0,
+                  pitch: parseFloat(traits.location.pitch) || 0
+                },
+                data: [],
+                activities: [],
+                type: "villager_instance"
+              },
+              {
                 id: definitionId,
-                name: npcName + "_definition",
+                name: npcName.toLowerCase() + "_definition",
                 displayName: npcName,
                 sound: {
                   soundId: { type: "default", value: "" },
@@ -629,28 +667,17 @@
                   volume: 0,
                   pitch: 0
                 },
-                skin: {
-                  texture: skintrait.textureRaw || "",
-                  signature: skintrait.signatureRaw || ""
-                },
-                data: [],
-                type: "npc_definition"
+                data: [generateHash({ id: npcId, name: npcName }, "B")],
+                type: "villager_definition"
               },
               {
-                id: instanceId,
-                name: npcName + "_instance",
-                definition: definitionId,
-                spawnLocation: {
-                  world: location.world || "world",
-                  x: location.x || 0,
-                  y: location.y || 0,
-                  z: location.z || 0,
-                  yaw: location.yaw || 0,
-                  pitch: location.pitch || 0
-                },
-                data: [],
-                activities: [],
-                type: "npc_instance"
+                id: generateHash({ id: npcId, name: npcName }, "B"),
+                name: npcName.toLowerCase() + "_data",
+                villagerType: villagerType.toUpperCase(),
+                profession: profession.toUpperCase(),
+                level: level,
+                priorityOverride: { enabled: false, value: 0 },
+                type: "villager_data"
               }
             ],
             chapter: "migrated",
