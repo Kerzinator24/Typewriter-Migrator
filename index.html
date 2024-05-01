@@ -399,8 +399,6 @@
     const npcData = jsonData.npc;
     const npcModal = document.getElementById('npcModal');
     const npcList = document.getElementById('npcList');
-    const npcHoverStates = {};
-
 
     // Clear previous NPC list
     npcList.innerHTML = '';
@@ -454,15 +452,15 @@
             npcImage.style.transition = "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out"; // Add transition effect with delay for translateY
 
             // Add event listeners for hover behavior on the entire NPC container
-            npcContainer.addEventListener('mouseenter', function() {
+            npcContainer.addEventListener('mouseenter', function () {
               // Delay the switch to full body and increase size
-              setTimeout(function() {
+              setTimeout(function () {
                 npcImage.src = fullBodyUrl; // Change the image source to full-body version
                 npcImage.style.width = "100px"; // Decrease width
               });
             });
 
-            npcContainer.addEventListener('mouseleave', function() {
+            npcContainer.addEventListener('mouseleave', function () {
               // Reset transform and size
               npcImage.style.transform = "translateY(0)";
               npcImage.src = headUrl; // Change back to head version
@@ -476,7 +474,7 @@
           }
         }
         //Check if the NPC is a "WITCH"
-          else if (npc.traits.type == "WITCH") {
+        else if (npc.traits.type === "WITCH") {
           try {
             const headUrl = "witch_head.png";
             const fullBodyUrl = "witch_full_body.png";
@@ -499,15 +497,115 @@
             npcImage.style.transition = "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out"; // Add transition effect with delay for translateY
 
             // Add event listeners for hover behavior on the entire NPC container
-            npcContainer.addEventListener('mouseenter', function() {
+            npcContainer.addEventListener('mouseenter', function () {
               // Delay the switch to full body and increase size
-              setTimeout(function() {
+              setTimeout(function () {
                 npcImage.src = fullBodyUrl; // Change the image source to full-body version
                 npcImage.style.width = "100px"; // Decrease width
               });
             });
 
-            npcContainer.addEventListener('mouseleave', function() {
+            npcContainer.addEventListener('mouseleave', function () {
+              // Reset transform and size
+              npcImage.style.transform = "translateY(0)";
+              npcImage.src = headUrl; // Change back to head version
+              npcImage.style.width = "50px"; // Reset width
+            });
+
+            // Append the image to the NPC info container
+            npcInfoContainer.appendChild(npcImage);
+          } catch (error) {
+            console.error('Error parsing textureRaw JSON:', error);
+          }
+        }
+        //Check if the NPC is a "VILLAGER"
+        else if (npc.traits.type === "VILLAGER") {
+          try {
+            const biome = npc.traits.villagertrait.type || "PLAINS";
+            const profession = npc.traits.profession || "NONE";
+            const headUrl = "villager_head.png";
+            let fullBodyUrl = "villager_full_body.png";
+            if (biome === "DESERT") {
+              if (profession === "ARMORER") {
+                fullBodyUrl = "images/villager/desert_armorer_full_body.png";
+              } else if (profession === "BUTCHER") {
+                fullBodyUrl = "desert_butcher_full_body.png";
+              } else if (profession === "CARTOGRAPHER") {
+                fullBodyUrl = "desert_cartographer_full_body.png";
+              } else if (profession === "CLERIC") {
+                fullBodyUrl = "desert_cleric_full_body.png";
+              } else if (profession === "FARMER") {
+                fullBodyUrl = "desert_farmer_full_body.png";
+              } else if (profession === "FISHERMAN") {
+                fullBodyUrl = "desert_fisherman_full_body.png";
+              } else if (profession === "FLETCHER") {
+                fullBodyUrl = "desert_fletcher_full_body.png";
+              } else if (profession === "LEATHERWORKER") {
+                fullBodyUrl = "desert_leatherworker_full_body.png";
+              } else if (profession === "LIBRARIAN") {
+                fullBodyUrl = "desert_librarian_full_body.png";
+              } else if (profession === "MASON") {
+                fullBodyUrl = "desert_mason_full_body.png";
+              } else if (profession === "NITWIT") {
+                fullBodyUrl = "desert_nitwit_full_body.png";
+              } else {
+                fullBodyUrl = "desert_none_full_body.png";
+              }
+            } else if (biome === "JUNGLE") {
+              if (profession === "ARMORER") {
+                fullBodyUrl = "jungle_armorer_full_body.png";
+              } else if (profession === "BUTCHER") {
+                fullBodyUrl = "jungle_butcher_full_body.png";
+              } else if (profession === "CARTOGRAPHER") {
+                fullBodyUrl = "jungle_cartographer_full_body.png";
+              } else if (profession === "CLERIC") {
+                fullBodyUrl = "jungle_cleric_full_body.png";
+              } else if (profession === "FARMER") {
+                fullBodyUrl = "jungle_farmer_full_body.png";
+              } else if (profession === "FISHERMAN") {
+                fullBodyUrl = "jungle_fisherman_full_body.png";
+              } else if (profession === "FLETCHER") {
+                fullBodyUrl = "jungle_fletcher_full_body.png";
+              } else if (profession === "LEATHERWORKER") {
+                fullBodyUrl = "jungle_leatherworker_full_body.png";
+              } else if (profession === "LIBRARIAN") {
+                fullBodyUrl = "jungle_librarian_full_body.png";
+              } else if (profession === "MASON") {
+                fullBodyUrl = "jungle_mason_full_body.png";
+              } else if (profession === "NITWIT") {
+                fullBodyUrl = "jungle_nitwit_full_body.png";
+              } else if (profession === "NONE") {
+                fullBodyUrl = "jungle_none_full_body.png";
+              }
+            }
+
+            // Create an image element for the NPC's head
+            const npcImage = document.createElement('img');
+            npcImage.src = headUrl;
+            npcImage.alt = `NPC ${npcId} Head`;
+
+            // Apply CSS styling to adjust the size of the image and transition effect
+            npcImage.classList.add('npc-image');
+            npcImage.style.width = "50px"; // Set initial width
+            npcImage.style.height = "auto"; // Maintain aspect ratio
+            npcImage.style.transition = "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out"; // Add transition effect with delay for translateY
+
+            // Apply CSS styling to adjust the size and position of the image and transition effect
+            npcImage.classList.add('npc-image');
+            npcImage.style.width = "50px"; // Set initial width
+            npcImage.style.height = "auto"; // Maintain aspect ratio
+            npcImage.style.transition = "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out"; // Add transition effect with delay for translateY
+
+            // Add event listeners for hover behavior on the entire NPC container
+            npcContainer.addEventListener('mouseenter', function () {
+              // Delay the switch to full body and increase size
+              setTimeout(function () {
+                npcImage.src = fullBodyUrl; // Change the image source to full-body version
+                npcImage.style.width = "100px"; // Decrease width
+              });
+            });
+
+            npcContainer.addEventListener('mouseleave', function () {
               // Reset transform and size
               npcImage.style.transform = "translateY(0)";
               npcImage.src = headUrl; // Change back to head version
@@ -568,188 +666,202 @@
       }
     }
 
-    // Display the modal
-    npcModal.style.display = "block";
-    modalDisplayed = true;
 
-    // Add event listener to the confirm selection button
-    document.getElementById('confirmNpcSelection').addEventListener('click', function() {
-      // Close the modal
-      npcModal.style.display = "none";
-      modalDisplayed = false;
 
-      // Process the selected NPCs
-      processSelectedNPCs();
-    });
 
-    const hashLength = 12; // Length of the hashed ID
+      // Display the modal
+      npcModal.style.display = "block";
+      modalDisplayed = true;
 
-    function generateHash(input, prefix) {
-      // Concatenate the NPC ID and name
-      const concatenated = input.id + input.name;
+      // Add event listener to the confirm selection button
+      document.getElementById('confirmNpcSelection').addEventListener('click', function () {
+        // Close the modal
+        npcModal.style.display = "none";
+        modalDisplayed = false;
 
-      // Encode to base64
-      const encoded = btoa(concatenated);
-
-      // Crop the hashed string to the desired length
-      const cropped = encoded.substring(0, hashLength);
-
-      // Add prefix
-      const idWithPrefix = prefix + cropped;
-
-      return idWithPrefix;
-    }
-
-    function processSelectedNPCs() {
-      const selectedNPCs = document.querySelectorAll('input[name="npc-checkbox"]:checked');
-      selectedNPCs.forEach(npc => {
-        const npcId = npc.value;
-        const npcData = jsonData.npc[npcId];
-        const npcName = npcData.name;
-
-        // Generate hashed ID for definition and instance with "i" and "d" prefixes
-        const definitionId = generateHash({ id: npcId, name: npcName }, "d");
-        const instanceId = generateHash({ id: npcId, name: npcName }, "i");
-
-        // Extract NPC traits with default values if missing
-        const traits = npcData.traits || {};
-        const location = traits.location || {};
-
-        let npcObject;
-
-        // Check if NPC type is "PLAYER"
-        if (npcData.traits.type === "PLAYER") {
-          // Extract relevant traits
-          const skintrait = traits.skintrait || {};
-          // Create JSON object for PLAYER NPC data
-          npcObject = {
-            name: npcName,
-            type: "manifest",
-            entries: [
-              {
-                id: definitionId,
-                name: npcName + "_definition",
-                displayName: npcName,
-                sound: {
-                  soundId: { type: "default", value: "" },
-                  soundSource: { type: "self", entryId: "", location: { world: "", x: 0, y: 0, z: 0, yaw: 0, pitch: 0 } },
-                  track: "MASTER",
-                  volume: 0,
-                  pitch: 0
-                },
-                skin: {
-                  texture: skintrait.textureRaw || "",
-                  signature: skintrait.signatureRaw || ""
-                },
-                data: [],
-                type: "npc_definition"
-              },
-              {
-                id: instanceId,
-                name: npcName + "_instance",
-                definition: definitionId,
-                spawnLocation: {
-                  world: location.world || "world",
-                  x: location.x || 0,
-                  y: location.y || 0,
-                  z: location.z || 0,
-                  yaw: location.yaw || 0,
-                  pitch: location.pitch || 0
-                },
-                data: [],
-                activities: [],
-                type: "npc_instance"
-              }
-            ],
-            chapter: "migrated",
-            priority: 0,
-            version: "0.5.0-beta-79"
-          };
-        } else {
-          // Extract relevant traits
-          const villagerType = traits.villagertrait.type || "";
-          const profession = traits.profession || "";
-          const level = npcData.traits.villagertrait ? mapVillagerLevel(npcData.traits.villagertrait.level) : "";
-          // Function to map villager level number to string
-          function mapVillagerLevel(level) {
-            switch (parseInt(level)) {
-              case 1:
-                return "NOVICE";
-              case 2:
-                return "APPRENTICE";
-              case 3:
-                return "JOURNEYMAN";
-              case 4:
-                return "EXPERT";
-              case 5:
-                return "MASTER";
-              default:
-                return "";
-            }
-          }
-          // Create JSON object for NPC data
-          npcObject = {
-            name: npcName.toLowerCase(),
-            type: "manifest",
-            entries: [
-              {
-                id: instanceId,
-                name: npcName.toLowerCase() + "_instance",
-                definition: definitionId,
-                spawnLocation: {
-                  world: traits.location.world || "",
-                  x: parseFloat(traits.location.x) || 0,
-                  y: parseFloat(traits.location.y) || 0,
-                  z: parseFloat(traits.location.z) || 0,
-                  yaw: parseFloat(traits.location.yaw) || 0,
-                  pitch: parseFloat(traits.location.pitch) || 0
-                },
-                data: [],
-                activities: [],
-                type: "villager_instance"
-              },
-              {
-                id: definitionId,
-                name: npcName.toLowerCase() + "_definition",
-                displayName: npcName,
-                sound: {
-                  soundId: { type: "default", value: "" },
-                  soundSource: { type: "self", entryId: "", location: { world: "", x: 0, y: 0, z: 0, yaw: 0, pitch: 0 } },
-                  track: "MASTER",
-                  volume: 0,
-                  pitch: 0
-                },
-                data: [generateHash({ id: npcId, name: npcName }, "B")],
-                type: "villager_definition"
-              },
-              {
-                id: generateHash({ id: npcId, name: npcName }, "B"),
-                name: npcName.toLowerCase() + "_data",
-                villagerType: villagerType.toUpperCase(),
-                profession: profession.toUpperCase(),
-                level: level,
-                priorityOverride: { enabled: false, value: 0 },
-                type: "villager_data"
-              }
-            ],
-            chapter: "migrated",
-            priority: 0,
-            version: "0.5.0-beta-79"
-          };
-        }
-
-        // Create a Blob object containing the JSON data
-        const blob = new Blob([JSON.stringify(npcObject, null, 2)], { type: "application/json" });
-
-        // Create a download link
-        const downloadLink = document.createElement("a");
-        downloadLink.href = URL.createObjectURL(blob);
-        downloadLink.download = npcName + ".json";
-        downloadLink.click();
+        // Process the selected NPCs
+        processSelectedNPCs();
       });
-    }
 
+      const hashLength = 12; // Length of the hashed ID
+
+      function generateHash(input, prefix) {
+        // Concatenate the NPC ID and name
+        const concatenated = input.id + input.name;
+
+        // Encode to base64
+        const encoded = btoa(concatenated);
+
+        // Crop the hashed string to the desired length
+        const cropped = encoded.substring(0, hashLength);
+
+        // Add prefix
+        const idWithPrefix = prefix + cropped;
+
+        return idWithPrefix;
+      }
+
+      function processSelectedNPCs() {
+        const selectedNPCs = document.querySelectorAll('input[name="npc-checkbox"]:checked');
+        selectedNPCs.forEach(npc => {
+          const npcId = npc.value;
+          const npcData = jsonData.npc[npcId];
+          const npcName = npcData.name;
+
+          // Generate hashed ID for definition and instance with "i" and "d" prefixes
+          const definitionId = generateHash({id: npcId, name: npcName}, "d");
+          const instanceId = generateHash({id: npcId, name: npcName}, "i");
+
+          // Extract NPC traits with default values if missing
+          const traits = npcData.traits || {};
+          const location = traits.location || {};
+
+          let npcObject;
+
+          // Check if NPC type is "PLAYER"
+          if (npcData.traits.type === "PLAYER") {
+            // Extract relevant traits
+            const skintrait = traits.skintrait || {};
+            // Create JSON object for PLAYER NPC data
+            npcObject = {
+              name: npcName,
+              type: "manifest",
+              entries: [
+                {
+                  id: definitionId,
+                  name: npcName + "_definition",
+                  displayName: npcName,
+                  sound: {
+                    soundId: {type: "default", value: ""},
+                    soundSource: {
+                      type: "self",
+                      entryId: "",
+                      location: {world: "", x: 0, y: 0, z: 0, yaw: 0, pitch: 0}
+                    },
+                    track: "MASTER",
+                    volume: 0,
+                    pitch: 0
+                  },
+                  skin: {
+                    texture: skintrait.textureRaw || "",
+                    signature: skintrait.signatureRaw || ""
+                  },
+                  data: [],
+                  type: "npc_definition"
+                },
+                {
+                  id: instanceId,
+                  name: npcName + "_instance",
+                  definition: definitionId,
+                  spawnLocation: {
+                    world: location.world || "world",
+                    x: location.x || 0,
+                    y: location.y || 0,
+                    z: location.z || 0,
+                    yaw: location.yaw || 0,
+                    pitch: location.pitch || 0
+                  },
+                  data: [],
+                  activities: [],
+                  type: "npc_instance"
+                }
+              ],
+              chapter: "migrated",
+              priority: 0,
+              version: "0.5.0-beta-79"
+            };
+          } else {
+            // Extract relevant traits
+            const villagerType = traits.villagertrait.type || "";
+            const profession = traits.profession || "";
+            const level = npcData.traits.villagertrait ? mapVillagerLevel(npcData.traits.villagertrait.level) : "";
+
+            // Function to map villager level number to string
+            function mapVillagerLevel(level) {
+              switch (parseInt(level)) {
+                case 1:
+                  return "NOVICE";
+                case 2:
+                  return "APPRENTICE";
+                case 3:
+                  return "JOURNEYMAN";
+                case 4:
+                  return "EXPERT";
+                case 5:
+                  return "MASTER";
+                default:
+                  return "";
+              }
+            }
+
+            // Create JSON object for NPC data
+            npcObject = {
+              name: npcName.toLowerCase(),
+              type: "manifest",
+              entries: [
+                {
+                  id: instanceId,
+                  name: npcName.toLowerCase() + "_instance",
+                  definition: definitionId,
+                  spawnLocation: {
+                    world: traits.location.world || "",
+                    x: parseFloat(traits.location.x) || 0,
+                    y: parseFloat(traits.location.y) || 0,
+                    z: parseFloat(traits.location.z) || 0,
+                    yaw: parseFloat(traits.location.yaw) || 0,
+                    pitch: parseFloat(traits.location.pitch) || 0
+                  },
+                  data: [],
+                  activities: [],
+                  type: "villager_instance"
+                },
+                {
+                  id: definitionId,
+                  name: npcName.toLowerCase() + "_definition",
+                  displayName: npcName,
+                  sound: {
+                    soundId: {type: "default", value: ""},
+                    soundSource: {
+                      type: "self",
+                      entryId: "",
+                      location: {world: "", x: 0, y: 0, z: 0, yaw: 0, pitch: 0}
+                    },
+                    track: "MASTER",
+                    volume: 0,
+                    pitch: 0
+                  },
+                  data: [generateHash({id: npcId, name: npcName}, "B")],
+                  type: "villager_definition"
+                },
+                {
+                  id: generateHash({id: npcId, name: npcName}, "B"),
+                  name: npcName.toLowerCase() + "_data",
+                  villagerType: villagerType.toUpperCase(),
+                  profession: profession.toUpperCase(),
+                  level: level,
+                  priorityOverride: {enabled: false, value: 0},
+                  type: "villager_data"
+                }
+              ],
+              chapter: "migrated",
+              priority: 0,
+              version: "0.5.0-beta-79"
+            };
+          }
+
+
+          // Create a Blob object containing the JSON data
+          const blob = new Blob([JSON.stringify(npcObject, null, 2)], {type: "application/json"});
+
+          // Create a download link
+          const downloadLink = document.createElement("a");
+          downloadLink.href = URL.createObjectURL(blob);
+          downloadLink.download = npcName + ".json";
+          downloadLink.click();
+        });
+      }
   }
+
 
 </script>
 </body>
