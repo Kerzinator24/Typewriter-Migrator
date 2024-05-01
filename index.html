@@ -475,6 +475,51 @@
             console.error('Error parsing textureRaw JSON:', error);
           }
         }
+        //Check if the NPC is a "WITCH"
+          else if (npc.traits.type == "WITCH") {
+          try {
+            const headUrl = "witch_head.png";
+            const fullBodyUrl = "witch_full_body.png";
+
+            // Create an image element for the NPC's head
+            const npcImage = document.createElement('img');
+            npcImage.src = headUrl;
+            npcImage.alt = `NPC ${npcId} Head`;
+
+            // Apply CSS styling to adjust the size of the image and transition effect
+            npcImage.classList.add('npc-image');
+            npcImage.style.width = "50px"; // Set initial width
+            npcImage.style.height = "auto"; // Maintain aspect ratio
+            npcImage.style.transition = "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out"; // Add transition effect with delay for translateY
+
+            // Apply CSS styling to adjust the size and position of the image and transition effect
+            npcImage.classList.add('npc-image');
+            npcImage.style.width = "50px"; // Set initial width
+            npcImage.style.height = "auto"; // Maintain aspect ratio
+            npcImage.style.transition = "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out"; // Add transition effect with delay for translateY
+
+            // Add event listeners for hover behavior on the entire NPC container
+            npcContainer.addEventListener('mouseenter', function() {
+              // Delay the switch to full body and increase size
+              setTimeout(function() {
+                npcImage.src = fullBodyUrl; // Change the image source to full-body version
+                npcImage.style.width = "100px"; // Decrease width
+              });
+            });
+
+            npcContainer.addEventListener('mouseleave', function() {
+              // Reset transform and size
+              npcImage.style.transform = "translateY(0)";
+              npcImage.src = headUrl; // Change back to head version
+              npcImage.style.width = "50px"; // Reset width
+            });
+
+            // Append the image to the NPC info container
+            npcInfoContainer.appendChild(npcImage);
+          } catch (error) {
+            console.error('Error parsing textureRaw JSON:', error);
+          }
+        }
 
         // Create an unordered list for NPC details
         const detailsList = document.createElement('ul');
@@ -505,11 +550,18 @@
         const nameLabel = document.createElement('label');
         nameLabel.textContent = `NPC ${npcId}: ${npc.name}`;
 
+        // Create a label for the NPC type
+        const typeLabel = document.createElement('label');
+        typeLabel.textContent = `,   Type: ${npc.traits.type}`;
+
         // Append the name label to the NPC info container
         npcInfoContainer.appendChild(nameLabel);
 
         // Append the NPC info container to the NPC container
         npcContainer.appendChild(npcInfoContainer);
+
+        // Append the type label to the NPC info container
+        npcInfoContainer.appendChild(typeLabel);
 
         // Append the NPC container to the NPC list
         npcList.appendChild(npcContainer);
