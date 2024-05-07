@@ -476,8 +476,8 @@
         //Check if the NPC is a "WITCH"
         else if (npc.traits.type === "WITCH") {
           try {
-            const headUrl = "witch_head.png";
-            const fullBodyUrl = "witch_full_body.png";
+            const headUrl = "images/witch_head.png";
+            const fullBodyUrl = "images/witch/witch_full_body.png";
 
             // Create an image element for the NPC's head
             const npcImage = document.createElement('img');
@@ -523,7 +523,7 @@
           try {
             const biome = npc.traits.villagertrait.type || "PLAINS";
             const profession = npc.traits.profession || "NONE";
-            const headUrl = "villager_head.png";
+            const headUrl = "images/villager/villager_head.png";
             let fullBodyUrl = "villager_full_body.png";
             if (biome === "DESERT") {
               if (profession === "ARMORER") {
