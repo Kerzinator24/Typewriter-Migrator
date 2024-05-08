@@ -842,10 +842,6 @@
         npcList.appendChild(npcContainer);
       }
     }
-
-
-
-
       // Display the modal
       npcModal.style.display = "block";
       modalDisplayed = true;
@@ -947,7 +943,7 @@
               priority: 0,
               version: "0.5.0-beta-79"
             };
-          } else {
+          } else if (npcData.traits.type === "VILLAGER") {
             // Extract relevant traits
             const villagerType = traits.villagertrait.type || "";
             const profession = traits.profession || "";
@@ -1024,8 +1020,54 @@
               priority: 0,
               version: "0.5.0-beta-79"
             };
+          } else if (npcData.traits.type === "WITCH") {
+            // Create JSON object for NPC data
+            npcObject = {
+              name: npcName.toLowerCase(),
+              type: "manifest",
+              entries: [
+                {
+                  id: instanceId,
+                  name: npcName.toLowerCase() + "_instance",
+                  definition: definitionId,
+                  spawnLocation: {
+                    world: traits.location.world || "",
+                    x: parseFloat(traits.location.x) || 0,
+                    y: parseFloat(traits.location.y) || 0,
+                    z: parseFloat(traits.location.z) || 0,
+                    yaw: parseFloat(traits.location.yaw) || 0,
+                    pitch: parseFloat(traits.location.pitch) || 0
+                  },
+                  data: [],
+                  activities: [],
+                  type: "witch_instance"
+                },
+                {
+                  id: definitionId,
+                  name: npcName.toLowerCase() + "_definition",
+                  displayName: npcName,
+                  sound: {
+                    soundId: {type: "default", value: ""},
+                    soundSource: {
+                      type: "self",
+                      entryId: "",
+                      location: {world: "", x: 0, y: 0, z: 0, yaw: 0, pitch: 0}
+                    },
+                    track: "MASTER",
+                    volume: 0,
+                    pitch: 0
+                  },
+                  data: [],
+                  type: "witch_definition"
+                }
+              ],
+              chapter: "migrated",
+              priority: 0,
+              version: "0.5.0-beta-79"
+            };
+          } else {
+            console.log("NPC type of ${npcData.traits.type} is not supported")
           }
-
 
           // Create a Blob object containing the JSON data
           const blob = new Blob([JSON.stringify(npcObject, null, 2)], {type: "application/json"});
