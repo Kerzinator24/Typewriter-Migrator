@@ -473,51 +473,7 @@
             console.error('Error parsing textureRaw JSON:', error);
           }
         }
-        //Check if the NPC is a "WITCH"
-        else if (npc.traits.type === "WITCH") {
-          try {
-            const headUrl = "images/witch_head.png";
-            const fullBodyUrl = "images/witch/witch_full_body.png";
 
-            // Create an image element for the NPC's head
-            const npcImage = document.createElement('img');
-            npcImage.src = headUrl;
-            npcImage.alt = `NPC ${npcId} Head`;
-
-            // Apply CSS styling to adjust the size of the image and transition effect
-            npcImage.classList.add('npc-image');
-            npcImage.style.width = "50px"; // Set initial width
-            npcImage.style.height = "auto"; // Maintain aspect ratio
-            npcImage.style.transition = "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out"; // Add transition effect with delay for translateY
-
-            // Apply CSS styling to adjust the size and position of the image and transition effect
-            npcImage.classList.add('npc-image');
-            npcImage.style.width = "50px"; // Set initial width
-            npcImage.style.height = "auto"; // Maintain aspect ratio
-            npcImage.style.transition = "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out"; // Add transition effect with delay for translateY
-
-            // Add event listeners for hover behavior on the entire NPC container
-            npcContainer.addEventListener('mouseenter', function () {
-              // Delay the switch to full body and increase size
-              setTimeout(function () {
-                npcImage.src = fullBodyUrl; // Change the image source to full-body version
-                npcImage.style.width = "100px"; // Decrease width
-              });
-            });
-
-            npcContainer.addEventListener('mouseleave', function () {
-              // Reset transform and size
-              npcImage.style.transform = "translateY(0)";
-              npcImage.src = headUrl; // Change back to head version
-              npcImage.style.width = "50px"; // Reset width
-            });
-
-            // Append the image to the NPC info container
-            npcInfoContainer.appendChild(npcImage);
-          } catch (error) {
-            console.error('Error parsing textureRaw JSON:', error);
-          }
-        }
         //Check if the NPC is a "VILLAGER"
         else if (npc.traits.type === "VILLAGER") {
           try {
@@ -755,6 +711,103 @@
                 fullBodyUrl = "images/villager/plains/plains_none.png";
               }
             }
+
+            // Create an image element for the NPC's head
+            const npcImage = document.createElement('img');
+            npcImage.src = headUrl;
+            npcImage.alt = `NPC ${npcId} Head`;
+
+            // Apply CSS styling to adjust the size of the image and transition effect
+            npcImage.classList.add('npc-image');
+            npcImage.style.width = "50px"; // Set initial width
+            npcImage.style.height = "auto"; // Maintain aspect ratio
+            npcImage.style.transition = "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out"; // Add transition effect with delay for translateY
+
+            // Apply CSS styling to adjust the size and position of the image and transition effect
+            npcImage.classList.add('npc-image');
+            npcImage.style.width = "50px"; // Set initial width
+            npcImage.style.height = "auto"; // Maintain aspect ratio
+            npcImage.style.transition = "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out"; // Add transition effect with delay for translateY
+
+            // Add event listeners for hover behavior on the entire NPC container
+            npcContainer.addEventListener('mouseenter', function () {
+              // Delay the switch to full body and increase size
+              setTimeout(function () {
+                npcImage.src = fullBodyUrl; // Change the image source to full-body version
+                npcImage.style.width = "100px"; // Decrease width
+              });
+            });
+
+            npcContainer.addEventListener('mouseleave', function () {
+              // Reset transform and size
+              npcImage.style.transform = "translateY(0)";
+              npcImage.src = headUrl; // Change back to head version
+              npcImage.style.width = "50px"; // Reset width
+            });
+
+            // Append the image to the NPC info container
+            npcInfoContainer.appendChild(npcImage);
+          } catch (error) {
+            console.error('Error parsing textureRaw JSON:', error);
+          }
+        } //Check if the NPC is a "WITCH"
+        else if (npcData.traits.type === "ZOMBIE" ||
+          npcData.traits.type === "HUSK" ||
+          npcData.traits.type === "PIGLIN" ||
+          npcData.traits.type === "HOGLIN" ||
+          npcData.traits.type === "PIGLIN_BRUTE" ||
+          npcData.traits.type === "WARDEN" ||
+          npcData.traits.type === "ENDERMAN" ||
+          npcData.traits.type === "SKELETON" ||
+          npcData.traits.type === "COW" ||
+          npcData.traits.type === "IRON_GOLEM" ||
+          npcData.traits.type === "WITCH") {
+          try {
+            if (npcData.traits.type === "ZOMBIE") {
+              const headUrl = "images/zombie/witch_head.png";
+              const fullBodyUrl = "images/zombie/zombie_full_body.png";
+            }
+            if (npcData.traits.type === "HUSK") {
+              const headUrl = "images/husk/husk_head.png";
+              const fullBodyUrl = "images/husk/husk_full_body.png";
+            }
+            if (npcData.traits.type === "PIGLIN") {
+              const headUrl = "images/piglin/piglin_head.png";
+              const fullBodyUrl = "images/piglin/piglin_full_body.png";
+            }
+            if (npcData.traits.type === "HOGLIN") {
+              const headUrl = "images/hoglin/hoglin_head.png";
+              const fullBodyUrl = "images/hoglin/hoglin_full_body.png";
+            }
+            if (npcData.traits.type === "PIGLIN_BRUTE") {
+              const headUrl = "images/piglin_brute/piglin_brute_head.png";
+              const fullBodyUrl = "images/piglin_brute/piglin_brute_full_body.png";
+            }
+            if (npcData.traits.type === "WARDEN") {
+              const headUrl = "images/warden/warden_head.png";
+              const fullBodyUrl = "images/warden/warden_full_body.png";
+            }
+            if (npcData.traits.type === "ENDERMAN") {
+              const headUrl = "images/enderman/enderman_head.png";
+              const fullBodyUrl = "images/enderman/enderman_full_body.png";
+            }
+            if (npcData.traits.type === "SKELETON") {
+              const headUrl = "images/skeleton/skeleton_head.png";
+              const fullBodyUrl = "images/skeleton/skeleton_full_body.png";
+            }
+            if (npcData.traits.type === "COW") {
+              const headUrl = "images/cow/cow_head.png";
+              const fullBodyUrl = "images/cow/cow_full_body.png";
+            }
+            if (npcData.traits.type === "IRON_GOLEM") {
+              const headUrl = "images/iron_golem/iron_golem_head.png";
+              const fullBodyUrl = "images/iron_golem/iron_golem_full_body.png";
+            }
+            if (npcData.traits.type === "WITCH") {
+              const headUrl = "images/witch/witch_head.png";
+              const fullBodyUrl = "images/witch/witch_full_body.png";
+            }
+
 
             // Create an image element for the NPC's head
             const npcImage = document.createElement('img');
@@ -1090,7 +1143,6 @@
         });
       }
   }
-
 
 </script>
 </body>
