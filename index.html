@@ -1020,7 +1020,17 @@
               priority: 0,
               version: "0.5.0-beta-79"
             };
-          } else if (npcData.traits.type === "WITCH") {
+          } else if (npcData.traits.type === "ZOMBIE" ||
+                     npcData.traits.type === "HUSK" ||
+                     npcData.traits.type === "PIGLIN" ||
+                     npcData.traits.type === "HOGLIN" ||
+                     npcData.traits.type === "PIGLIN_BRUTE" ||
+                     npcData.traits.type === "WARDEN" ||
+                     npcData.traits.type === "ENDERMAN" ||
+                     npcData.traits.type === "SKELETON" ||
+                     npcData.traits.type === "COW" ||
+                     npcData.traits.type === "IRON_GOLEM" ||
+                     npcData.traits.type === "WITCH") {
             // Create JSON object for NPC data
             npcObject = {
               name: npcName.toLowerCase(),
@@ -1040,7 +1050,7 @@
                   },
                   data: [],
                   activities: [],
-                  type: "witch_instance"
+                  type: npcData.traits.type.toLowerCase() + "_instance"
                 },
                 {
                   id: definitionId,
@@ -1058,7 +1068,7 @@
                     pitch: 0
                   },
                   data: [],
-                  type: "witch_definition"
+                  type: npcData.traits.type.toLowerCase() + "_definition"
                 }
               ],
               chapter: "migrated",
@@ -1066,7 +1076,7 @@
               version: "0.5.0-beta-79"
             };
           } else {
-            console.log("NPC type of ${npcData.traits.type} is not supported")
+            alert("NPC type not supported: " + npcData.traits.type + "\nPlease report this in the typewriter discord server.");
           }
 
           // Create a Blob object containing the JSON data
