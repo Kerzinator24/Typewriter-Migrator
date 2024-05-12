@@ -367,7 +367,7 @@ function createNpcChecklists(jsonData) {
         npc.traits.type === "WITCH") {
         try {
           if (npc.traits.type === "ZOMBIE") {
-            const headUrl = "images/zombie/witch_head.png";
+            const headUrl = "images/zombie/zombie_head.png";
             const fullBodyUrl = "images/zombie/zombie_full_body.png";
           }
           if (npc.traits.type === "HUSK") {
