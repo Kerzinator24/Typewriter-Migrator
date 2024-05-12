@@ -750,8 +750,7 @@
           } catch (error) {
             console.error('Error parsing textureRaw JSON:', error);
           }
-        } //Check if the NPC is a "WITCH"
-        else if (npcData.traits.type === "ZOMBIE" ||
+        } else if (npcData.traits.type === "ZOMBIE" ||
           npcData.traits.type === "HUSK" ||
           npcData.traits.type === "PIGLIN" ||
           npcData.traits.type === "HOGLIN" ||
@@ -997,18 +996,7 @@
               priority: 0,
               version: "0.5.0-beta-79"
             };
-            // Check if NPC has glowing trait and add glowing effect data to the data list
-            if (npcData.metadata.glowing === true) {
-              npcObject.entries.push({
-                id: glowingEffectId,
-                name: npcName.toLowerCase() + "_glowing_effect_data",
-                priorityOverride: {enabled: false, value: 0},
-                type: "glowing_effect_data",
-                glowing: true
-              });
-              // Add glowing effect ID to the data list
-              npcObject.entries[0].data.push(glowingEffectId);
-            }
+            checkData(npcData);
           } else if (npcData.traits.type === "VILLAGER") {
             // Extract relevant traits
             const villagerType = traits.villagertrait.type || "";
@@ -1086,18 +1074,7 @@
               priority: 0,
               version: "0.5.0-beta-79"
             };
-            // Check if NPC has glowing trait and add glowing effect data to the data list
-            if (npcData.metadata.glowing === true) {
-              npcObject.entries.push({
-                id: glowingEffectId,
-                name: npcName.toLowerCase() + "_glowing_effect_data",
-                priorityOverride: {enabled: false, value: 0},
-                type: "glowing_effect_data",
-                glowing: true
-              });
-              // Add glowing effect ID to the data list
-              npcObject.entries[0].data.push(glowingEffectId);
-            }
+            checkData(npcData);
           } else if (npcData.traits.type === "ZOMBIE" ||
             npcData.traits.type === "HUSK" ||
             npcData.traits.type === "PIGLIN" ||
@@ -1153,6 +1130,13 @@
               priority: 0,
               version: "0.5.0-beta-79"
             };
+            checkData(npcData);
+          } else {
+            alert("NPC type not supported: " + npcData.traits.type + "\nPlease report this in the typewriter discord server.");
+          }
+          //funcion for checking for data
+          function checkData(data) {
+
             // Check if NPC has glowing trait and add glowing effect data to the data list
             if (npcData.metadata.glowing === true) {
               npcObject.entries.push({
@@ -1165,10 +1149,8 @@
               // Add glowing effect ID to the data list
               npcObject.entries[0].data.push(glowingEffectId);
             }
-          } else {
-            alert("NPC type not supported: " + npcData.traits.type + "\nPlease report this in the typewriter discord server.");
-          }
 
+          }
           // Create a Blob object containing the JSON data
           const blob = new Blob([JSON.stringify(npcObject, null, 2)], {type: "application/json"});
 
