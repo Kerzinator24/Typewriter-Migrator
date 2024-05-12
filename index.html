@@ -970,7 +970,7 @@
                   },
                   skin: {
                     texture: skintrait.textureRaw || "",
-                    signature: skintrait.signatureRaw || ""
+                    signature: skintrait.signature || ""
                   },
                   data: [],
                   type: "npc_definition"
@@ -1074,16 +1074,16 @@
               version: "0.5.0-beta-79"
             };
           } else if (npcData.traits.type === "ZOMBIE" ||
-                     npcData.traits.type === "HUSK" ||
-                     npcData.traits.type === "PIGLIN" ||
-                     npcData.traits.type === "HOGLIN" ||
-                     npcData.traits.type === "PIGLIN_BRUTE" ||
-                     npcData.traits.type === "WARDEN" ||
-                     npcData.traits.type === "ENDERMAN" ||
-                     npcData.traits.type === "SKELETON" ||
-                     npcData.traits.type === "COW" ||
-                     npcData.traits.type === "IRON_GOLEM" ||
-                     npcData.traits.type === "WITCH") {
+            npcData.traits.type === "HUSK" ||
+            npcData.traits.type === "PIGLIN" ||
+            npcData.traits.type === "HOGLIN" ||
+            npcData.traits.type === "PIGLIN_BRUTE" ||
+            npcData.traits.type === "WARDEN" ||
+            npcData.traits.type === "ENDERMAN" ||
+            npcData.traits.type === "SKELETON" ||
+            npcData.traits.type === "COW" ||
+            npcData.traits.type === "IRON_GOLEM" ||
+            npcData.traits.type === "WITCH") {
             // Create JSON object for NPC data
             npcObject = {
               name: npcName.toLowerCase(),
