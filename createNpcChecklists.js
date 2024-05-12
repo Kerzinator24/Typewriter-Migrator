@@ -23,7 +23,18 @@ function createNpcChecklists(jsonData) {
 
       // Determine if all NPCs should be selected based on migration mode
       if (MigrationMode === 'all') {
-        checkbox.checked = true;
+        console.log(typeof npcIds[0])
+        if (npcIds.includes(parseInt(npcId))) {
+          console.log("success")
+          checkbox.checked = true;
+        }
+      }
+
+      //if MigrationMode is set to "typewriterOnly" only the NPCs with the id in the array npcIds will be selected
+      else {
+        if (npcIds.includes(npcId)) {
+          checkbox.checked = true;
+        }
       }
 
       // Append the checkbox to the NPC info container
@@ -72,8 +83,9 @@ function createNpcChecklists(jsonData) {
 
           // Append the image to the NPC info container
           npcInfoContainer.appendChild(npcImage);
+          console.log(npc.name)
         } catch (error) {
-          console.error('Error parsing textureRaw JSON:', error);
+          console.error('Error parsing textureRaw JSON:'+ npc.name, error, npc.name);
         }
       }
 
@@ -742,7 +754,6 @@ function createNpcChecklists(jsonData) {
       }
       //funcion for checking for data
       function checkData(data) {
-
         // Check if NPC has glowing trait and add glowing effect data to the data list
         if (npcData.metadata.glowing === true) {
           npcObject.entries.push({

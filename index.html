@@ -202,21 +202,38 @@
     });
   }
 
-  // Function to unzip the pages directory and store its content
+
+  // Array to store NPC IDs
+  let npcIds = [];
+
+  // Function to unzip the pages directory and search for reference NPCs
   async function fetchPagesContent(zip) {
     const topLevelFolders = Object.keys(zip.files);
     const pagesFolderName = topLevelFolders.find(folderName => folderName.endsWith('/pages/'));
     if (!pagesFolderName) return; // If pages folder doesn't exist, return
 
     const pagesFolder = zip.folder(pagesFolderName);
+
     await pagesFolder.forEach(async function(relativePath, zipEntry) {
       if (!zipEntry.dir) { // If it's a file
         const fileContent = await zipEntry.async("text");
-        // Store the content of each file for later use
-        pagesFilesContent.push({ name: zipEntry.name, content: fileContent });
+        const pageData = JSON.parse(fileContent);
+
+        // Search for reference NPCs in the entries of each page
+        if (pageData.entries) {
+          pageData.entries.forEach(entry => {
+            if (entry.type === "reference_npc") {
+              npcIds.push(entry.npcId);
+            }
+          });
+        }
       }
     });
+
+    // Log the list of NPC IDs to console
+    console.log("NPC IDs of reference NPCs:", npcIds);
   }
+
 
   function migrateFolder(zip) {
     // Fetch content of files inside "pages" directory
