@@ -8,16 +8,18 @@ function migrateFolder(zip) {
     if (!adaptersFolderName) return resolve([]); // If adapters folder doesn't exist, return an empty array
 
     const adaptersFolder = zip.folder(adaptersFolderName);
-    const files = [];
+    let files = [];
     adaptersFolder.forEach(function(relativePath, zipEntry) {
       if (!zipEntry.dir) { // If it's a file
         files.push(zipEntry.name);
       }
     });
 
-    // Remove the first item from the array
-    files.shift();
+    //declare the accepted modules
+    const acceptedModules = ['Citizens', 'WorldGuard', 'MythicMobs'];
 
+    // Remove the adapters not in the acceptedModules list
+    files = files.filter(file => acceptedModules.some(m => file.includes(m)));
     resolve(files);
   });
 }
