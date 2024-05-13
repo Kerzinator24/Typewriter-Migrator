@@ -202,9 +202,12 @@
     });
   }
 
-
   // Array to store NPC IDs
   let npcIds = [];
+  // Array to store page names and content
+  let pagesData = [];
+  // Array to store the index of reference NPCs in pagesData
+  let npcIndexes = [];
 
   // Function to unzip the pages directory and search for reference NPCs
   async function fetchPagesContent(zip) {
@@ -219,11 +222,15 @@
         const fileContent = await zipEntry.async("text");
         const pageData = JSON.parse(fileContent);
 
+        // Store page name and content
+        pagesData.push({ name: zipEntry.name, content: pageData });
+
         // Search for reference NPCs in the entries of each page
         if (pageData.entries) {
-          pageData.entries.forEach(entry => {
+          pageData.entries.forEach((entry, index) => {
             if (entry.type === "reference_npc") {
               npcIds.push(entry.npcId);
+              npcIndexes.push({ page: pagesData.length - 1, index });
             }
           });
         }
@@ -232,6 +239,10 @@
 
     // Log the list of NPC IDs to console
     console.log("NPC IDs of reference NPCs:", npcIds);
+    // Log the array of page names and content to console
+    console.log("Pages Data:", pagesData);
+    // Log the array of NPC indexes to console
+    console.log("NPC Indexes:", npcIndexes);
   }
 
 </script>
