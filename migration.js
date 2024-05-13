@@ -153,6 +153,8 @@ function displaySelectedModules(selectedModules) {
               const yamlContent = event.target.result;
               try {
                 jsonData = jsyaml.load(yamlContent); // Parse YAML to JSON
+                let savesContent = yamlContent; // Store the JSON content in a global variable
+                console.log(savesContent); // Output YAML to console
                 console.log(jsonData); // Output JSON to console
               } catch (error) {
                 console.error("Error parsing YAML:", error);
