@@ -31,7 +31,7 @@ function createNpcChecklists(jsonData) {
       }
 
       //if MigrationMode is set to "typewriterOnly" only the NPCs with the id in the array npcIds will be selected
-      else {
+      else if (MigrationMode === 'typewriterOnly') {
         if (npcIds.includes(npcId)) {
           checkbox.checked = true;
         }
