@@ -562,6 +562,7 @@ function createNpcChecklists(jsonData) {
       const definitionId = generateHash({id: npcId, name: npcName}, "d");
       const instanceId = generateHash({id: npcId, name: npcName}, "i");
       const glowingEffectId = generateHash({id: npcId, name: npcName}, "glo-d");
+      const ageableId = generateHash({id: npcId, name: npcName}, "age-d");
 
       // Extract NPC traits with default values if missing
       const traits = npcData.traits || {};
@@ -766,12 +767,20 @@ function createNpcChecklists(jsonData) {
           npcObject.entries.push({
             id: glowingEffectId,
             name: npcName.toLowerCase() + "_glowing_effect_data",
+            glowing: true
             priorityOverride: {enabled: false, value: 0},
             type: "glowing_effect_data",
-            glowing: true
           });
           // Add glowing effect ID to the data list
           npcObject.entries[0].data.push(glowingEffectId);
+        } if (npcData.traits.age.age < 0) {
+          npcObject.entries.push({
+            id: ageableId,
+            name: npcName.toLowerCase() + "_ageable_data",
+            baby: true,
+            priorityOverride: {enabled: false, value: 0},
+            type: "ageable_data",
+            });
         }
 
       }
