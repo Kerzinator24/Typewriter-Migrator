@@ -552,6 +552,7 @@ function createNpcChecklists(jsonData) {
 
   function processSelectedNPCs() {
     const selectedNPCs = document.querySelectorAll('input[name="npc-checkbox"]:checked');
+    const selNPC = Array.from(selectedNPCs);
     selectedNPCs.forEach(npc => {
       const npcId = npc.value;
       const npcData = jsonData.npc[npcId];
@@ -782,6 +783,16 @@ function createNpcChecklists(jsonData) {
       downloadLink.href = URL.createObjectURL(blob);
       downloadLink.download = npcName + ".json";
       downloadLink.click();
+      delete jsonData.npc[npcId];
     });
+
+    const yamlData = jsyaml.dump(jsonData, { lineWidth: -1 });
+    console.log(yamlData); // Output YAML to console
+    //download the yaml file
+    const yamlBlob = new Blob([yamlData], {type: "application/yaml"});
+    const yamlDownloadLink = document.createElement("a");
+    yamlDownloadLink.href = URL.createObjectURL(yamlBlob);
+    yamlDownloadLink.download = "saves.yml";
+    yamlDownloadLink.click();
   }
 }
