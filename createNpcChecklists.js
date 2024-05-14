@@ -767,9 +767,9 @@ function createNpcChecklists(jsonData) {
           npcObject.entries.push({
             id: glowingEffectId,
             name: npcName.toLowerCase() + "_glowing_effect_data",
-            glowing: true
+            glowing: true,
             priorityOverride: {enabled: false, value: 0},
-            type: "glowing_effect_data",
+            type: "glowing_effect_data"
           });
           // Add glowing effect ID to the data list
           npcObject.entries[0].data.push(glowingEffectId);
