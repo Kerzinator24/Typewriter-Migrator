@@ -383,48 +383,48 @@ function createNpcChecklists(jsonData) {
         npc.traits.type === "WITCH") {
         try {
           if (npc.traits.type === "ZOMBIE") {
-            const headUrl = "images/zombie/zombie_head.png";
-            const fullBodyUrl = "images/zombie/zombie_full_body.png";
+            headUrl = "images/zombie/zombie_head.png";
+            fullBodyUrl = "images/zombie/zombie_full_body.png";
           }
           if (npc.traits.type === "HUSK") {
-            const headUrl = "images/husk/husk_head.png";
-            const fullBodyUrl = "images/husk/husk_full_body.png";
+            headUrl = "images/husk/husk_head.png";
+            fullBodyUrl = "images/husk/husk_full_body.png";
           }
           if (npc.traits.type === "PIGLIN") {
-            const headUrl = "images/piglin/piglin_head.png";
-            const fullBodyUrl = "images/piglin/piglin_full_body.png";
+            headUrl = "images/piglin/piglin_head.png";
+            fullBodyUrl = "images/piglin/piglin_full_body.png";
           }
           if (npc.traits.type === "HOGLIN") {
-            const headUrl = "images/hoglin/hoglin_head.png";
-            const fullBodyUrl = "images/hoglin/hoglin_full_body.png";
+            headUrl = "images/hoglin/hoglin_head.png";
+            fullBodyUrl = "images/hoglin/hoglin_full_body.png";
           }
           if (npc.traits.type === "PIGLIN_BRUTE") {
-            const headUrl = "images/piglin_brute/piglin_brute_head.png";
-            const fullBodyUrl = "images/piglin_brute/piglin_brute_full_body.png";
+            headUrl = "images/piglin_brute/piglin_brute_head.png";
+            fullBodyUrl = "images/piglin_brute/piglin_brute_full_body.png";
           }
           if (npc.traits.type === "WARDEN") {
-            const headUrl = "images/warden/warden_head.png";
-            const fullBodyUrl = "images/warden/warden_full_body.png";
+            headUrl = "images/warden/warden_head.png";
+            fullBodyUrl = "images/warden/warden_full_body.png";
           }
           if (npc.traits.type === "ENDERMAN") {
-            const headUrl = "images/enderman/enderman_head.png";
-            const fullBodyUrl = "images/enderman/enderman_full_body.png";
+            headUrl = "images/enderman/enderman_head.png";
+            fullBodyUrl = "images/enderman/enderman_full_body.png";
           }
           if (npc.traits.type === "SKELETON") {
-            const headUrl = "images/skeleton/skeleton_head.png";
-            const fullBodyUrl = "images/skeleton/skeleton_full_body.png";
+            headUrl = "images/skeleton/skeleton_head.png";
+            fullBodyUrl = "images/skeleton/skeleton_full_body.png";
           }
           if (npc.traits.type === "COW") {
-            const headUrl = "images/cow/cow_head.png";
-            const fullBodyUrl = "images/cow/cow_full_body.png";
+            headUrl = "images/cow/cow_head.png";
+            fullBodyUrl = "images/cow/cow_full_body.png";
           }
           if (npc.traits.type === "IRON_GOLEM") {
-            const headUrl = "images/iron_golem/iron_golem_head.png";
-            const fullBodyUrl = "images/iron_golem/iron_golem_full_body.png";
+            headUrl = "images/iron_golem/iron_golem_head.png";
+            fullBodyUrl = "images/iron_golem/iron_golem_full_body.png";
           }
           if (npc.traits.type === "WITCH") {
-            const headUrl = "images/witch/witch_head.png";
-            const fullBodyUrl = "images/witch/witch_full_body.png";
+            headUrl = "images/witch/witch_head.png";
+            fullBodyUrl = "images/witch/witch_full_body.png";
           }
 
 
