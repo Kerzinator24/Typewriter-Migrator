@@ -57,13 +57,15 @@ function createNpcChecklists(jsonData) {
           npcImage.classList.add('npc-image');
           npcImage.style.width = "50px"; // Set initial width
           npcImage.style.height = "auto"; // Maintain aspect ratio
-          npcImage.style.transition = "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out"; // Add transition effect with delay for translateY
+          // Add transition effect with delay for translateY
+          npcImage.style.transition = "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
 
           // Apply CSS styling to adjust the size and position of the image and transition effect
           npcImage.classList.add('npc-image');
           npcImage.style.width = "50px"; // Set initial width
           npcImage.style.height = "auto"; // Maintain aspect ratio
-          npcImage.style.transition = "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out"; // Add transition effect with delay for translateY
+          // Add transition effect with delay for translateY
+          npcImage.style.transition = "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
 
           // Add event listeners for hover behavior on the entire NPC container
           npcContainer.addEventListener('mouseenter', function () {
@@ -339,13 +341,15 @@ function createNpcChecklists(jsonData) {
             npcImage.classList.add('npc-image');
             npcImage.style.width = "50px"; // Set initial width
             npcImage.style.height = "auto"; // Maintain aspect ratio
-            npcImage.style.transition = "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out"; // Add transition effect with delay for translateY
+            // Add transition effect with delay for translateY
+            npcImage.style.transition = "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
 
             // Apply CSS styling to adjust the size and position of the image and transition effect
             npcImage.classList.add('npc-image');
             npcImage.style.width = "50px"; // Set initial width
             npcImage.style.height = "auto"; // Maintain aspect ratio
-            npcImage.style.transition = "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out"; // Add transition effect with delay for translateY
+            // Add transition effect with delay for translateY
+            npcImage.style.transition = "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
 
             // Add event listeners for hover behavior on the entire NPC container
             npcContainer.addEventListener('mouseenter', function () {
@@ -433,13 +437,15 @@ function createNpcChecklists(jsonData) {
           npcImage.classList.add('npc-image');
           npcImage.style.width = "50px"; // Set initial width
           npcImage.style.height = "auto"; // Maintain aspect ratio
-          npcImage.style.transition = "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out"; // Add transition effect with delay for translateY
+          // Add transition effect with delay for translateY
+          npcImage.style.transition = "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
 
           // Apply CSS styling to adjust the size and position of the image and transition effect
           npcImage.classList.add('npc-image');
           npcImage.style.width = "50px"; // Set initial width
           npcImage.style.height = "auto"; // Maintain aspect ratio
-          npcImage.style.transition = "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out"; // Add transition effect with delay for translateY
+          // Add transition effect with delay for translateY
+          npcImage.style.transition = "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
 
           // Add event listeners for hover behavior on the entire NPC container
           npcContainer.addEventListener('mouseenter', function () {
