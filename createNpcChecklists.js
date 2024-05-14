@@ -781,6 +781,8 @@ function createNpcChecklists(jsonData) {
             priorityOverride: {enabled: false, value: 0},
             type: "ageable_data",
             });
+          // Add ageable effect ID to the data list
+          npcObject.entries[0].data.push(ageableId);
         }
 
       }
