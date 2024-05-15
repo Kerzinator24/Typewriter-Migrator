@@ -559,16 +559,20 @@ function createNpcChecklists(jsonData) {
       const npcName = npcData.name;
 
       // Generate hashed ID for definition and instance with "i" and "d" prefixes
-      const definitionId = generateHash({id: npcId, name: npcName}, "d");
-      const instanceId = generateHash({id: npcId, name: npcName}, "i");
-      const glowingEffectId = generateHash({id: npcId, name: npcName}, "glo-d");
-      const ageableId = generateHash({id: npcId, name: npcName}, "age-d");
+      let definitionId = generateHash({id: npcId, name: npcName}, "d");
+      let instanceId = generateHash({id: npcId, name: npcName}, "i");
+      let glowingEffectId = generateHash({id: npcId, name: npcName}, "glo-d");
+      let ageableId = generateHash({id: npcId, name: npcName}, "age-d");
 
       // Extract NPC traits with default values if missing
       const traits = npcData.traits || {};
       const location = traits.location || {};
 
       let npcObject;
+
+      if (npcIdEntryMap.hasOwnProperty(npcEntryId) && npcIdEntryMap[npcEntryId] === npcId) {
+        definitionId = npcEntryId;
+      }
 
       // Check if NPC type is "PLAYER"
       if (npcData.traits.type === "PLAYER") {

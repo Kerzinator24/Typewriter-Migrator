@@ -208,6 +208,8 @@
   let pagesData = [];
   // Array to store the index of reference NPCs in pagesData
   let npcIndexes = [];
+  // Object to store NPC ID and entry ID pairs
+  const npcIdEntryMap = {};
 
   // Function to unzip the pages directory and search for reference NPCs
   async function fetchPagesContent(zip) {
@@ -230,12 +232,32 @@
           pageData.entries.forEach((entry, index) => {
             if (entry.type === "reference_npc") {
               npcIds.push(entry.npcId);
+
               npcIndexes.push({ page: pagesData.length - 1, index });
+
+              // Adding NPC's npcId and entryId in key-value pairs
+              const npcEntryId = entry.id;
+              const npcId = entry.npcId;
+              npcIdEntryMap[npcEntryId] = npcId;
+              //delete the reference_npc entry
+              pageData.entries.splice(index, 1);
+              console.log("Removed reference_npc entry:", pageData);
+
+            } if (entry.type === "on_npc_interact") {
+              // Rename the on npc interact entry to entity_interact_event
+              entry.type = "entity_interact_event";
+              entry.name = "new_entity_interact_event"; // Optionally renaming the name as well
+              // Change "identifier" to "definition"
+              entry.definition = entry.identifier;
+              delete entry.identifier;
+              // Log the entry to console
+              console.log("Modified Entry:", entry);
             }
           });
         }
       }
     });
+
 
     // Log the list of NPC IDs to console
     console.log("NPC IDs of reference NPCs:", npcIds);
