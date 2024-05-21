@@ -570,9 +570,13 @@ function createNpcChecklists(jsonData) {
 
       let npcObject;
 
-      if (npcIdEntryMap.hasOwnProperty(npcEntryId) && npcIdEntryMap[npcEntryId] === npcId) {
-        definitionId = npcEntryId;
-      }
+
+      // Checking npcIdEntryArray for npcEntryId
+      npcIdEntryArray.forEach(({ npcEntryId: storedNpcEntryId, npcId: storedNpcId }) => {
+        if (storedNpcId === npcId) {
+          definitionId = storedNpcEntryId;
+        }
+      });
 
       // Check if NPC type is "PLAYER"
       if (npcData.traits.type === "PLAYER") {
