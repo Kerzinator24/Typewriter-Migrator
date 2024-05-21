@@ -26,6 +26,71 @@
       }
     }
 
+    @keyframes slideInFromLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    body {
+      background-color: #1c1b1f; /* Grey background from image */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      font-family: 'Arial', sans-serif;
+      color: #E5E5E5; /* Light grey text color from image */
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin-bottom: 2rem;
+      animation: slideInFromTop 0.5s ease-in-out;
+    }
+
+    .scrollable {
+      max-height: 200em;
+      justify-content: center;
+      overflow-y: auto;
+    }
+
+    #uploadArea {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .btn {
+      background-color: #1d315d;
+      color: white;
+      font-weight: bold;
+      padding: 0.75rem 1.5rem; /* More padding for a better feel */
+      border-radius: 1.5rem; /* More rounded buttons */
+      margin: 0.5rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease-in-out;
+      border: none; /* Remove default border */
+      font-size: 1rem; /* Increase font size */
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    }
+
+    .btn:hover {
+      background-color: #263e6c;
+    }
+
     .modal {
       display: none;
       position: fixed;
@@ -39,26 +104,39 @@
     }
 
     .modal-content {
-      background-color: #fefefe;
-      margin: 20% auto;
+      background-color: #2e2c36; /* Dark blue modal */
+      color: #E5E5E5; /* Light grey text color from image */
+      margin: 10% auto;
       padding: 20px;
-      border: 1px solid #888;
+      border: none;
+      border-radius: 1.5rem; /* More rounded modal */
       width: 80%;
+      animation: slideInFromLeft 0.5s ease-in-out;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
     }
 
     .modal-content button {
-      margin: 5px;
+      background-color: #1d315d;
+      color: white;
+      font-weight: bold;
+      padding: 0.5rem 1rem;
+      border-radius: 1.5rem; /* More rounded buttons inside modal */
+      margin: 0.5rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease-in-out;
+      border: none; /* Remove default border */
+      font-size: 1rem; /* Increase font size */
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    }
+
+    .modal-content button:hover {
+      background-color: #263e6c;
     }
 
     .no-migration-needed {
       color: red;
     }
 
-    .scrollable {
-      max-height: 200em; /* Set the maximum height */
-      justify-content: center; /* Center the content */
-      overflow-y: auto; /* Enable vertical scrolling */
-    }
     .npc-info-container {
       display: flex;
       align-items: center;
@@ -67,22 +145,22 @@
     .npc-container {
       margin-bottom: 20px;
     }
-
   </style>
+
 </head>
-<body class="bg-gray-100 flex flex-col items-center justify-center h-screen">
-<h1 class="text-4xl font-bold mb-8">Typewriter Auto-Migration Tool</h1>
-<div id="uploadArea"  class="scrollable">
+<body>
+<h1>Typewriter Auto-Migration Tool</h1>
+<div id="uploadArea" class="scrollable">
   <input type="file" id="fileInput" class="hidden">
-  <button id="uploadButton" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out">Upload File</button>
+  <button id="uploadButton" class="btn">Upload File</button>
 </div>
 
 <!-- Add a modal for selecting migration options -->
 <div id="migrationModal" class="modal">
   <div class="modal-content">
     <h2 class="text-xl font-bold mb-4">Choose migration option for Citizens module</h2>
-    <button id="migrateAllNpcsBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out mr-4">Migrate All NPCs</button>
-    <button id="migrateTypewriterNpcsBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out">Migrate NPCs Used by Typewriter</button>
+    <button id="migrateAllNpcsBtn" class="btn mr-4">Migrate All NPCs</button>
+    <button id="migrateTypewriterNpcsBtn" class="btn">Migrate NPCs Used by Typewriter</button>
   </div>
 </div>
 
@@ -93,7 +171,7 @@
     <div id="npcList" class="scrollable">
       <!-- NPC checkboxes will be appended here -->
     </div>
-    <button id="confirmNpcSelection" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out mt-4">Confirm Selection</button>
+    <button id="confirmNpcSelection" class="btn mt-4">Confirm Selection</button>
   </div>
 </div>
 
@@ -209,7 +287,7 @@
   // Array to store the index of reference NPCs in pagesData
   let npcIndexes = [];
   // Object to store NPC ID and entry ID pairs
-  const npcIdEntryMap = {};
+  let npcIdEntryArray = [];
 
   // Function to unzip the pages directory and search for reference NPCs
   async function fetchPagesContent(zip) {
@@ -232,18 +310,21 @@
           pageData.entries.forEach((entry, index) => {
             if (entry.type === "reference_npc") {
               npcIds.push(entry.npcId);
-
               npcIndexes.push({ page: pagesData.length - 1, index });
 
-              // Adding NPC's npcId and entryId in key-value pairs
+              // Adding NPC's npcId and entryId in key-value pairs as subarrays with variable names
               const npcEntryId = entry.id;
               const npcId = entry.npcId;
-              npcIdEntryMap[npcEntryId] = npcId;
+              npcIdEntryArray.push({
+                npcEntryId: npcEntryId,
+                npcId: npcId
+              });
+
               //delete the reference_npc entry
               pageData.entries.splice(index, 1);
               console.log("Removed reference_npc entry:", pageData);
-
-            } if (entry.type === "on_npc_interact") {
+            }
+            if (entry.type === "on_npc_interact") {
               // Rename the on npc interact entry to entity_interact_event
               entry.type = "entity_interact_event";
               entry.name = "new_entity_interact_event"; // Optionally renaming the name as well
