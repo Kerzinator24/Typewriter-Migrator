@@ -132,7 +132,7 @@ function displaySelectedModules(selectedModules) {
 
     const uploadButton = document.createElement('button');
     uploadButton.textContent = "Upload";
-    uploadButton.classList.add("bg-blue-500", "hover:bg-blue-700", "text-white", "font-bold", "py-2", "px-4", "rounded", "transition", "duration-300", "ease-in-out", "mt-4", "ml-2", "inline-block");
+    uploadButton.classList.add("btn");
     uploadButton.style.marginTop = "1rem";
 
     // Check if migration is needed for this module

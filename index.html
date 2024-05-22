@@ -254,7 +254,7 @@
 
             const confirmButton = document.createElement('button');
             confirmButton.textContent = "Continue";
-            confirmButton.classList.add("bg-blue-500", "hover:bg-blue-700", "text-white", "font-bold", "py-2", "px-4", "rounded", "transition", "duration-300", "ease-in-out", "mt-4", "inline-block");
+            confirmButton.classList.add("btn");
             confirmButton.addEventListener('click', function() {
               if (!modalDisplayed && MigrationMode === 'none') {
                 const checkedFiles = Array.from(document.querySelectorAll('input[name="file"]:checked')).map(function(checkbox) {
