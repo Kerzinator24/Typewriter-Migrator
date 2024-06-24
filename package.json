@@ -23,6 +23,6 @@
   },
   "dependencies": {
     "js-yaml": "^4.1.0",
-    "yaml": "^2.4.2"
+    "yaml": "^2.4.3"
   }
 }
