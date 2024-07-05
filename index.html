@@ -320,14 +320,14 @@
                 npcId: npcId
               });
 
-              //delete the reference_npc entry
+              // Delete the reference_npc entry
               pageData.entries.splice(index, 1);
               console.log("Removed reference_npc entry:", pageData);
             }
             if (entry.type === "on_npc_interact") {
               // Rename the on npc interact entry to entity_interact_event
               entry.type = "entity_interact_event";
-              entry.name = "new_entity_interact_event"; // Optionally renaming the name as well
+              entry.name = "new_entity_interact_event";
               // Change "identifier" to "definition"
               entry.definition = entry.identifier;
               delete entry.identifier;
@@ -338,7 +338,6 @@
         }
       }
     });
-
 
     // Log the list of NPC IDs to console
     console.log("NPC IDs of reference NPCs:", npcIds);

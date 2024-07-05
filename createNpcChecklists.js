@@ -569,14 +569,25 @@ function createNpcChecklists(jsonData) {
       const location = traits.location || {};
 
       let npcObject;
+      let currentNpcId = npcId;
 
+      // Find the npc entry in npcIdEntryArray
+      const npcEntry = npcIdEntryArray.find(entry => entry.npcId === currentNpcId);
 
-      // Checking npcIdEntryArray for npcEntryId
-      npcIdEntryArray.forEach(({ npcEntryId: storedNpcEntryId, npcId: storedNpcId }) => {
-        if (storedNpcId === npcId) {
-          definitionId = storedNpcEntryId;
-        }
-      });
+      // Log the current NPC ID and the found entry
+      console.log("Current NPC ID:", currentNpcId);
+      console.log("Found NPC Entry:", npcEntry);
+
+      // If found, set the definitionId
+      if (npcEntry) {
+        const definitionId = npcEntry.npcEntryId;
+        console.log("Definition ID set:", definitionId);
+        return definitionId;
+      } else {
+        console.log("NPC ID not found in npcIdEntryArray");
+        console.log(npcIdEntryArray)
+        return null;
+      }
 
       // Check if NPC type is "PLAYER"
       if (npcData.traits.type === "PLAYER") {
