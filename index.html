@@ -1352,6 +1352,15 @@
       yamlDownloadLink.href = URL.createObjectURL(yamlBlob);
       yamlDownloadLink.download = "saves.yml";
       yamlDownloadLink.click();
+
+      // After processing NPCs and updating pages
+      pagesData.forEach((page, index) => {
+          const pageBlob = new Blob([JSON.stringify(page.content, null, 2)], {type: "application/json"});
+          const pageDownloadLink = document.createElement("a");
+          pageDownloadLink.href = URL.createObjectURL(pageBlob);
+          pageDownloadLink.download = `modified_${page.name}`;
+          pageDownloadLink.click();
+      });
     }
   }
 
