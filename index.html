@@ -1310,7 +1310,7 @@
         //funcion for checking for data
         function checkData(data) {
           // Check if NPC has glowing trait and add glowing effect data to the data list
-          if (npcData.metadata.glowing === true) {
+          if (npcData && npcData.metadata && npcData.metadata.glowing === true) {
             npcObject.entries.push({
               id: glowingEffectId,
               name: npcName.toLowerCase() + "_glowing_effect_data",
@@ -1330,7 +1330,7 @@
               });
             // Add ageable effect ID to the data list
             npcObject.entries[0].data.push(ageableId);
-          }
+          } else {}
 
         }
         // Create a Blob object containing the JSON data
