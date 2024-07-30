@@ -621,15 +621,24 @@
         }
 
           //Check if the NPC is a "VILLAGER"
-          else if (npc.traits.type === "VILLAGER") {
+            else if (npc.traits.type === "VILLAGER") {
                 let biome = "PLAINS";
                 let profession = "NONE";
                 try {
-                    biome = npc.traits.villagertrait.type || "PLAINS";
-                    profession = npc.traits.profession || "NONE";
-                  } catch (error) {
-                  console.error(npc);
+                    if (npc.traits.villagertrait && typeof npc.traits.villagertrait.type !== 'undefined') {
+                        biome = npc.traits.villagertrait.type ?? "PLAINS";
+                    } else {
+                        biome = "PLAINS";
+                    }
+                    if (typeof npc.traits.profession !== 'undefined') {
+                        profession = npc.traits.profession ?? "NONE";
+                    } else {
+                        profession = "NONE";
+                    }
+                } catch (error) {
+                    console.error("Problem with NPC:" + npc.name, error);
                 }
+            
               const headUrl = "images/villager/villager_head.png";
               let fullBodyUrl = "villager_full_body.png";
               if (biome === "DESERT") {
