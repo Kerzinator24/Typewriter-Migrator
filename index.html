@@ -1,644 +1,748 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Typewriter Auto-Migration Tool</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <style>
-    @keyframes slideInFromTop {
-      from {
-        opacity: 0;
-        transform: translateY(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-      }
-      to {
-        opacity: 1;
-      }
-    }
-
-    @keyframes slideInFromLeft {
-      from {
-        opacity: 0;
-        transform: translateX(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-
-    body {
-      background-color: #1c1b1f; /* Grey background from image */
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      font-family: 'Arial', sans-serif;
-      color: #E5E5E5; /* Light grey text color from image */
-      margin: 0;
-    }
-
-    h1 {
-      font-size: 2.5rem;
-      font-weight: bold;
-      margin-bottom: 2rem;
-      animation: slideInFromTop 0.5s ease-in-out;
-    }
-
-    .scrollable {
-      max-height: 200em;
-      justify-content: center;
-      overflow-y: auto;
-    }
-
-    #uploadArea {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      animation: fadeIn 1s ease-in-out;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    .btn {
-      background-color: #1d315d;
-      color: white;
-      font-weight: bold;
-      padding: 0.75rem 1.5rem; /* More padding for a better feel */
-      border-radius: 1.5rem; /* More rounded buttons */
-      margin: 0.5rem;
-      cursor: pointer;
-      transition: background-color 0.3s ease-in-out;
-      border: none; /* Remove default border */
-      font-size: 1rem; /* Increase font size */
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-    }
-
-    .btn:hover {
-      background-color: #263e6c;
-    }
-
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 1;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      overflow: auto;
-      background-color: rgba(0,0,0,0.4);
-    }
-
-    .modal-content {
-      background-color: #2e2c36; /* Dark blue modal */
-      color: #E5E5E5; /* Light grey text color from image */
-      margin: 10% auto;
-      padding: 20px;
-      border: none;
-      border-radius: 1.5rem; /* More rounded modal */
-      width: 80%;
-      animation: slideInFromLeft 0.5s ease-in-out;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
-    }
-
-    .modal-content button {
-      background-color: #1d315d;
-      color: white;
-      font-weight: bold;
-      padding: 0.5rem 1rem;
-      border-radius: 1.5rem; /* More rounded buttons inside modal */
-      margin: 0.5rem;
-      cursor: pointer;
-      transition: background-color 0.3s ease-in-out;
-      border: none; /* Remove default border */
-      font-size: 1rem; /* Increase font size */
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-    }
-
-    .modal-content button:hover {
-      background-color: #263e6c;
-    }
-
-    .no-migration-needed {
-      color: red;
-    }
-
-    .npc-info-container {
-      display: flex;
-      align-items: center;
-    }
-
-    .npc-container {
-      margin-bottom: 20px;
-    }
-  </style>
-
-</head>
-<body>
-<h1>Typewriter Auto-Migration Tool</h1>
-<div id="uploadArea" class="scrollable">
-  <input type="file" id="fileInput" class="hidden">
-  <button id="uploadButton" class="btn">Upload File</button>
-</div>
-
-<!-- Add a modal for selecting migration options -->
-<div id="migrationModal" class="modal">
-  <div class="modal-content">
-    <h2 class="text-xl font-bold mb-4">Choose migration option for Citizens module</h2>
-    <button id="migrateAllNpcsBtn" class="btn mr-4">Migrate All NPCs</button>
-    <button id="migrateTypewriterNpcsBtn" class="btn">Migrate NPCs Used by Typewriter</button>
-  </div>
-</div>
-
-<!-- Add a modal for displaying NPC checklist -->
-<div id="npcModal" class="modal">
-  <div class="modal-content">
-    <h2 class="text-xl font-bold mb-4">Select NPCs to Migrate</h2>
-    <div id="npcList" class="scrollable">
-      <!-- NPC checkboxes will be appended here -->
-    </div>
-    <button id="confirmNpcSelection" class="btn mt-4">Confirm Selection</button>
-  </div>
-</div>
-
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
-<script>
-  let migrateAll = false;
-  let migrateTypewriter = false;
-  let MigrationMode = 'none'; // Default value
-  let modalDisplayed = false; // Variable to track modal display state
-
-  // Array of modules that can be migrated
-  const migratableModules = ['Citizens', /* Add other migratable modules here */];
-
-  // Array to store content of files inside "pages" directory
-  let pagesFilesContent = [];
-  let jsonData = null; // Variable to store JSON data
-
-  document.getElementById('uploadButton').addEventListener('click', function() {
-    document.getElementById('fileInput').click();
-  });
-
-  document.getElementById('fileInput').addEventListener('change', function() {
-    const file = this.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const arrayBuffer = e.target.result;
-      unzipAndRezip(arrayBuffer);
-    };
-    reader.readAsArrayBuffer(file);
-  });
-
-  function unzipAndRezip(arrayBuffer) {
-    JSZip.loadAsync(arrayBuffer).then(function(zip) {
-      const newZip = new JSZip();
-      zip.forEach(function(relativePath, zipEntry) {
-        if (!zipEntry.dir) { // Skip directories
-          newZip.file(zipEntry.name, zipEntry.async("arraybuffer"), { binary: true });
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Typewriter Auto-Migration Tool</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      @keyframes slideInFromTop {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
         }
-      });
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
 
-      // Call migrateFolder function after unzipping
-      migrateFolder(zip).then(function(files) {
-        confirmFiles(files).then(function(confirmedFiles) {
-          if (confirmedFiles.length > 0) {
-            document.getElementById('uploadArea').innerHTML = '<h2 class="text-xl font-bold mb-4">Choose which data you want to migrate</h2><ul id="fileList" class="list-disc pl-8"></ul>';
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
 
-            const selectedModules = []; // Array to store selected modules
-            confirmedFiles.forEach(function(fileName, index) {
-              setTimeout(() => {
-                const listItem = document.createElement('li');
-                listItem.classList.add("flex", "items-center", "transition", "transform", "ease-in-out", "duration-300", "hover:scale-105", "delay-800", "animate__animated", "animate__fadeIn", "animate__delay-" + (index + 1), "animate__slideInFromTop");
+      @keyframes slideInFromLeft {
+        from {
+          opacity: 0;
+          transform: translateX(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
 
-                const checkbox = document.createElement('input');
-                checkbox.type = "checkbox";
-                checkbox.name = "file";
-                checkbox.value = fileName;
-                checkbox.classList.add("opacity-0");
-                listItem.appendChild(checkbox);
+      body {
+        background-color: #1c1b1f; /* Grey background from image */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        font-family: "Arial", sans-serif;
+        color: #e5e5e5; /* Light grey text color from image */
+        margin: 0;
+      }
 
-                const textNode = document.createTextNode(formatFileName(fileName));
-                if (textNode) { // Only append text if it's not null
-                  const textContainer = document.createElement('span');
-                  textContainer.appendChild(textNode);
-                  textContainer.classList.add("ml-2"); // Adding margin between checkbox and text
-                  listItem.appendChild(textContainer);
-                }
+      h1 {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 2rem;
+        animation: slideInFromTop 0.5s ease-in-out;
+      }
 
-                document.getElementById('fileList').appendChild(listItem);
+      .scrollable {
+        max-height: 200em;
+        justify-content: center;
+        overflow-y: auto;
+      }
 
-                // Trigger reflow to ensure checkbox and textNode are painted before adding fadeIn animation
-                void listItem.offsetWidth;
+      #uploadArea {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        animation: fadeIn 1s ease-in-out;
+      }
 
-                checkbox.classList.add("opacity-100", "transition", "duration-300", "delay-800", "animate__animated", "animate__fadeIn", "animate__delay-" + (index + 1));
-              }, 800 * index);
-            });
+      .hidden {
+        display: none;
+      }
 
-            const confirmButton = document.createElement('button');
-            confirmButton.textContent = "Continue";
-            confirmButton.classList.add("btn");
-            confirmButton.addEventListener('click', function() {
-              if (!modalDisplayed && MigrationMode === 'none') {
-                const checkedFiles = Array.from(document.querySelectorAll('input[name="file"]:checked')).map(function(checkbox) {
-                  return checkbox.value;
+      .btn {
+        background-color: #1d315d;
+        color: white;
+        font-weight: bold;
+        padding: 0.75rem 1.5rem; /* More padding for a better feel */
+        border-radius: 1.5rem; /* More rounded buttons */
+        margin: 0.5rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease-in-out;
+        border: none; /* Remove default border */
+        font-size: 1rem; /* Increase font size */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+      }
+
+      .btn:hover {
+        background-color: #263e6c;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.4);
+      }
+
+      .modal-content {
+        background-color: #2e2c36; /* Dark blue modal */
+        color: #e5e5e5; /* Light grey text color from image */
+        margin: 10% auto;
+        padding: 20px;
+        border: none;
+        border-radius: 1.5rem; /* More rounded modal */
+        width: 80%;
+        animation: slideInFromLeft 0.5s ease-in-out;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+      }
+
+      .modal-content button {
+        background-color: #1d315d;
+        color: white;
+        font-weight: bold;
+        padding: 0.5rem 1rem;
+        border-radius: 1.5rem; /* More rounded buttons inside modal */
+        margin: 0.5rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease-in-out;
+        border: none; /* Remove default border */
+        font-size: 1rem; /* Increase font size */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+      }
+
+      .modal-content button:hover {
+        background-color: #263e6c;
+      }
+
+      .no-migration-needed {
+        color: red;
+      }
+
+      .npc-info-container {
+        display: flex;
+        align-items: center;
+      }
+
+      .npc-container {
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Typewriter Auto-Migration Tool</h1>
+    <div id="uploadArea" class="scrollable">
+      <input type="file" id="fileInput" class="hidden" />
+      <button id="uploadButton" class="btn">Upload File</button>
+    </div>
+
+    <!-- Add a modal for selecting migration options -->
+    <div id="migrationModal" class="modal">
+      <div class="modal-content">
+        <h2 class="text-xl font-bold mb-4">
+          Choose migration option for Citizens module
+        </h2>
+        <button id="migrateAllNpcsBtn" class="btn mr-4">
+          Migrate All NPCs
+        </button>
+        <button id="migrateTypewriterNpcsBtn" class="btn">
+          Migrate NPCs Used by Typewriter
+        </button>
+      </div>
+    </div>
+
+    <!-- Add a modal for displaying NPC checklist -->
+    <div id="npcModal" class="modal">
+      <div class="modal-content">
+        <h2 class="text-xl font-bold mb-4">Select NPCs to Migrate</h2>
+        <div id="npcList" class="scrollable">
+          <!-- NPC checkboxes will be appended here -->
+        </div>
+        <button id="confirmNpcSelection" class="btn mt-4">
+          Confirm Selection
+        </button>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+    <script>
+      let migrateAll = false;
+      let migrateTypewriter = false;
+      let MigrationMode = "none"; // Default value
+      let modalDisplayed = false; // Variable to track modal display state
+
+      // Array of modules that can be migrated
+      const migratableModules = [
+        "Citizens" /* Add other migratable modules here */,
+      ];
+
+      // Array to store content of files inside "pages" directory
+      let pagesFilesContent = [];
+      let jsonData = null; // Variable to store JSON data
+
+      document
+        .getElementById("uploadButton")
+        .addEventListener("click", function () {
+          document.getElementById("fileInput").click();
+        });
+
+      document
+        .getElementById("fileInput")
+        .addEventListener("change", function () {
+          const file = this.files[0];
+          if (!file) return;
+
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            const arrayBuffer = e.target.result;
+            unzipAndRezip(arrayBuffer);
+          };
+          reader.readAsArrayBuffer(file);
+        });
+
+      function unzipAndRezip(arrayBuffer) {
+        JSZip.loadAsync(arrayBuffer).then(function (zip) {
+          const newZip = new JSZip();
+          zip.forEach(function (relativePath, zipEntry) {
+            if (!zipEntry.dir) {
+              // Skip directories
+              newZip.file(zipEntry.name, zipEntry.async("arraybuffer"), {
+                binary: true,
+              });
+            }
+          });
+
+          // Call migrateFolder function after unzipping
+          migrateFolder(zip).then(function (files) {
+            confirmFiles(files).then(function (confirmedFiles) {
+              if (confirmedFiles.length > 0) {
+                document.getElementById("uploadArea").innerHTML =
+                  '<h2 class="text-xl font-bold mb-4">Choose which data you want to migrate</h2><ul id="fileList" class="list-disc pl-8"></ul>';
+
+                const selectedModules = []; // Array to store selected modules
+                confirmedFiles.forEach(function (fileName, index) {
+                  setTimeout(() => {
+                    const listItem = document.createElement("li");
+                    listItem.classList.add(
+                      "flex",
+                      "items-center",
+                      "transition",
+                      "transform",
+                      "ease-in-out",
+                      "duration-300",
+                      "hover:scale-105",
+                      "delay-800",
+                      "animate__animated",
+                      "animate__fadeIn",
+                      "animate__delay-" + (index + 1),
+                      "animate__slideInFromTop",
+                    );
+
+                    const checkbox = document.createElement("input");
+                    checkbox.type = "checkbox";
+                    checkbox.name = "file";
+                    checkbox.value = fileName;
+                    checkbox.classList.add("opacity-0");
+                    listItem.appendChild(checkbox);
+
+                    const textNode = document.createTextNode(
+                      formatFileName(fileName),
+                    );
+                    if (textNode) {
+                      // Only append text if it's not null
+                      const textContainer = document.createElement("span");
+                      textContainer.appendChild(textNode);
+                      textContainer.classList.add("ml-2"); // Adding margin between checkbox and text
+                      listItem.appendChild(textContainer);
+                    }
+
+                    document.getElementById("fileList").appendChild(listItem);
+
+                    // Trigger reflow to ensure checkbox and textNode are painted before adding fadeIn animation
+                    void listItem.offsetWidth;
+
+                    checkbox.classList.add(
+                      "opacity-100",
+                      "transition",
+                      "duration-300",
+                      "delay-800",
+                      "animate__animated",
+                      "animate__fadeIn",
+                      "animate__delay-" + (index + 1),
+                    );
+                  }, 800 * index);
                 });
-                selectedModules.push(...checkedFiles); // Add selected files to the array
-                console.log("Selected Modules:", selectedModules); // Output selected modules to console
 
-                // Check if migration is needed
-                checkIfMigrationNeeded(selectedModules);
+                const confirmButton = document.createElement("button");
+                confirmButton.textContent = "Continue";
+                confirmButton.classList.add("btn");
+                confirmButton.addEventListener("click", function () {
+                  if (!modalDisplayed && MigrationMode === "none") {
+                    const checkedFiles = Array.from(
+                      document.querySelectorAll('input[name="file"]:checked'),
+                    ).map(function (checkbox) {
+                      return checkbox.value;
+                    });
+                    selectedModules.push(...checkedFiles); // Add selected files to the array
+                    console.log("Selected Modules:", selectedModules); // Output selected modules to console
+
+                    // Check if migration is needed
+                    checkIfMigrationNeeded(selectedModules);
+                  } else {
+                    // If migration mode is not 'none', create checklists for NPCs
+                    createNpcChecklists(jsonData);
+                  }
+                });
+
+                document
+                  .getElementById("uploadArea")
+                  .appendChild(confirmButton);
               } else {
-                // If migration mode is not 'none', create checklists for NPCs
-                createNpcChecklists(jsonData);
+                console.log("No files selected for migration.");
               }
             });
+          });
+        });
+      }
 
-            document.getElementById('uploadArea').appendChild(confirmButton);
+      // Array to store NPC IDs
+      let npcIds = [];
+      // Array to store page names and content
+      let pagesData = [];
+      // Array to store the index of reference NPCs in pagesData
+      let npcIndexes = [];
+      // Object to store NPC ID and entry ID pairs
+      let npcIdEntryArray = [];
+
+      // Function to unzip the pages directory and search for reference NPCs
+      async function fetchPagesContent(zip) {
+        const topLevelFolders = Object.keys(zip.files);
+        const pagesFolderName = topLevelFolders.find((folderName) =>
+          folderName.endsWith("/pages/"),
+        );
+        if (!pagesFolderName) return; // If pages folder doesn't exist, return
+
+        const pagesFolder = zip.folder(pagesFolderName);
+
+        await pagesFolder.forEach(async function (relativePath, zipEntry) {
+          if (!zipEntry.dir) {
+            // If it's a file
+            const fileContent = await zipEntry.async("text");
+            const pageData = JSON.parse(fileContent);
+
+            // Store page name and content
+            pagesData.push({ name: zipEntry.name, content: pageData });
+
+            // Search for reference NPCs in the entries of each page
+            if (pageData.entries) {
+              pageData.entries.forEach((entry, index) => {
+                if (entry.type === "reference_npc") {
+                  npcIds.push(entry.npcId);
+                  npcIndexes.push({ page: pagesData.length - 1, index });
+
+                  // Adding NPC's npcId and entryId in key-value pairs as subarrays with variable names
+                  const npcEntryId = entry.id;
+                  const npcId = entry.npcId;
+                  npcIdEntryArray.push({
+                    npcEntryId: npcEntryId,
+                    npcId: npcId,
+                  });
+
+                  // Delete the reference_npc entry
+                  pageData.entries.splice(index, 1);
+                  console.log("Removed reference_npc entry:", pageData);
+                }
+                if (entry.type === "on_npc_interact") {
+                  // Rename the on npc interact entry to entity_interact_event
+                  entry.type = "entity_interact_event";
+                  entry.name = "new_entity_interact_event";
+                  // Change "identifier" to "definition"
+                  entry.definition = entry.identifier;
+                  delete entry.identifier;
+                  // Log the entry to console
+                  console.log("Modified Entry:", entry);
+                }
+              });
+            }
+          }
+        });
+
+        // Log the list of NPC IDs to console
+        console.log("NPC IDs of reference NPCs:", npcIds);
+        // Log the array of page names and content to console
+        console.log("Pages Data:", pagesData);
+        // Log the array of NPC indexes to console
+        console.log("NPC Indexes:", npcIndexes);
+      }
+
+      function migrateFolder(zip) {
+        // Fetch content of files inside "pages" directory
+        fetchPagesContent(zip);
+
+        return new Promise(function (resolve) {
+          const topLevelFolders = Object.keys(zip.files);
+          const adaptersFolderName = topLevelFolders.find((folderName) =>
+            folderName.endsWith("/adapters/"),
+          );
+          if (!adaptersFolderName) return resolve([]); // If adapters folder doesn't exist, return an empty array
+
+          const adaptersFolder = zip.folder(adaptersFolderName);
+          let files = [];
+          adaptersFolder.forEach(function (relativePath, zipEntry) {
+            if (!zipEntry.dir) {
+              // If it's a file
+              files.push(zipEntry.name);
+            }
+          });
+
+          //declare the accepted modules
+          const acceptedModules = ["Citizens", "WorldGuard", "MythicMobs"];
+
+          // Remove the adapters not in the acceptedModules list
+          files = files.filter((file) =>
+            acceptedModules.some((m) => file.includes(m)),
+          );
+          resolve(files);
+        });
+      }
+
+      function confirmFiles(files) {
+        const confirmedFiles = [];
+        if (files.length === 0) {
+          alert("No files found in the 'adapters' folder");
+          return Promise.resolve(confirmedFiles);
+        }
+
+        return new Promise(function (resolve) {
+          resolve(files);
+        });
+      }
+
+      function formatFileName(filePath) {
+        const formattedFileName = filePath
+          .split("/")
+          .pop()
+          .replace(/\.jar$/i, "")
+          .replace(/([a-z])([A-Z])/g, "$1 $2")
+          .replace(/Adapter/g, "")
+          .trim();
+        return formattedFileName.includes("Basic") ? null : formattedFileName;
+      }
+
+      function checkIfMigrationNeeded(selectedModules) {
+        let migrationNeeded = false;
+
+        selectedModules.forEach(function (module) {
+          const needsMigration = migratableModules.some((m) =>
+            module.includes(m),
+          );
+          if (!needsMigration) {
+            // Display a message indicating that migration is not needed for this module
+            const listItem = document.createElement("li");
+            listItem.innerHTML = `<span>${formatFileName(module)}</span><p class="text-red-600 ml-2">No migration needed for this adapter.</p>`;
+            document.getElementById("fileList").appendChild(listItem);
           } else {
-            console.log("No files selected for migration.");
+            migrationNeeded = true;
+            // Check if Citizens module is selected, if so, display the migration modal
+            if (module.includes("Citizens")) {
+              displayMigrationModal();
+            }
           }
         });
-      });
-    });
-  }
 
-  // Array to store NPC IDs
-  let npcIds = [];
-  // Array to store page names and content
-  let pagesData = [];
-  // Array to store the index of reference NPCs in pagesData
-  let npcIndexes = [];
-  // Object to store NPC ID and entry ID pairs
-  let npcIdEntryArray = [];
+        if (migrationNeeded) {
+          // Display only the selected modules that need migration
+          displaySelectedModules(selectedModules);
+        } else {
+          // Display a message indicating that migration is not needed for any selected modules
+          document.getElementById("uploadArea").innerHTML =
+            '<p class="text-xl font-semibold text-red-600">No migration needed for any selected adapters.</p>';
+        }
+      }
 
-  // Function to unzip the pages directory and search for reference NPCs
-  async function fetchPagesContent(zip) {
-    const topLevelFolders = Object.keys(zip.files);
-    const pagesFolderName = topLevelFolders.find(folderName => folderName.endsWith('/pages/'));
-    if (!pagesFolderName) return; // If pages folder doesn't exist, return
+      // Function to display the modal if the selected modules include Citizens
+      function displayMigrationModal() {
+        const modal = document.getElementById("migrationModal");
+        modal.style.display = "block";
+        modalDisplayed = true;
 
-    const pagesFolder = zip.folder(pagesFolderName);
-
-    await pagesFolder.forEach(async function(relativePath, zipEntry) {
-      if (!zipEntry.dir) { // If it's a file
-        const fileContent = await zipEntry.async("text");
-        const pageData = JSON.parse(fileContent);
-
-        // Store page name and content
-        pagesData.push({ name: zipEntry.name, content: pageData });
-
-        // Search for reference NPCs in the entries of each page
-        if (pageData.entries) {
-          pageData.entries.forEach((entry, index) => {
-            if (entry.type === "reference_npc") {
-              npcIds.push(entry.npcId);
-              npcIndexes.push({ page: pagesData.length - 1, index });
-
-              // Adding NPC's npcId and entryId in key-value pairs as subarrays with variable names
-              const npcEntryId = entry.id;
-              const npcId = entry.npcId;
-              npcIdEntryArray.push({
-                npcEntryId: npcEntryId,
-                npcId: npcId
-              });
-
-              // Delete the reference_npc entry
-              pageData.entries.splice(index, 1);
-              console.log("Removed reference_npc entry:", pageData);
-            }
-            if (entry.type === "on_npc_interact") {
-              // Rename the on npc interact entry to entity_interact_event
-              entry.type = "entity_interact_event";
-              entry.name = "new_entity_interact_event";
-              // Change "identifier" to "definition"
-              entry.definition = entry.identifier;
-              delete entry.identifier;
-              // Log the entry to console
-              console.log("Modified Entry:", entry);
-            }
+        // Add event listeners to the modal buttons
+        document
+          .getElementById("migrateAllNpcsBtn")
+          .addEventListener("click", function () {
+            MigrationMode = "all"; // Set MigrationMode to 'all'
+            closeModal();
           });
-        }
-      }
-    });
 
-    // Log the list of NPC IDs to console
-    console.log("NPC IDs of reference NPCs:", npcIds);
-    // Log the array of page names and content to console
-    console.log("Pages Data:", pagesData);
-    // Log the array of NPC indexes to console
-    console.log("NPC Indexes:", npcIndexes);
-  }
-
-  function migrateFolder(zip) {
-    // Fetch content of files inside "pages" directory
-    fetchPagesContent(zip);
-
-    return new Promise(function(resolve) {
-      const topLevelFolders = Object.keys(zip.files);
-      const adaptersFolderName = topLevelFolders.find(folderName => folderName.endsWith('/adapters/'));
-      if (!adaptersFolderName) return resolve([]); // If adapters folder doesn't exist, return an empty array
-
-      const adaptersFolder = zip.folder(adaptersFolderName);
-      let files = [];
-      adaptersFolder.forEach(function(relativePath, zipEntry) {
-        if (!zipEntry.dir) { // If it's a file
-          files.push(zipEntry.name);
-        }
-      });
-
-      //declare the accepted modules
-      const acceptedModules = ['Citizens', 'WorldGuard', 'MythicMobs'];
-
-      // Remove the adapters not in the acceptedModules list
-      files = files.filter(file => acceptedModules.some(m => file.includes(m)));
-      resolve(files);
-    });
-  }
-
-  function confirmFiles(files) {
-    const confirmedFiles = [];
-    if (files.length === 0) {
-      alert("No files found in the 'adapters' folder");
-      return Promise.resolve(confirmedFiles);
-    }
-
-    return new Promise(function(resolve) {
-      resolve(files);
-    });
-  }
-
-  function formatFileName(filePath) {
-    const formattedFileName = filePath.split('/').pop().replace(/\.jar$/i, '').replace(/([a-z])([A-Z])/g, '$1 $2').replace(/Adapter/g, '').trim();
-    return formattedFileName.includes("Basic") ? null : formattedFileName;
-  }
-
-  function checkIfMigrationNeeded(selectedModules) {
-    let migrationNeeded = false;
-
-    selectedModules.forEach(function(module) {
-      const needsMigration = migratableModules.some(m => module.includes(m));
-      if (!needsMigration) {
-        // Display a message indicating that migration is not needed for this module
-        const listItem = document.createElement('li');
-        listItem.innerHTML = `<span>${formatFileName(module)}</span><p class="text-red-600 ml-2">No migration needed for this adapter.</p>`;
-        document.getElementById('fileList').appendChild(listItem);
-      } else {
-        migrationNeeded = true;
-        // Check if Citizens module is selected, if so, display the migration modal
-        if (module.includes('Citizens')) {
-          displayMigrationModal();
-        }
-      }
-    });
-
-    if (migrationNeeded) {
-      // Display only the selected modules that need migration
-      displaySelectedModules(selectedModules);
-    } else {
-      // Display a message indicating that migration is not needed for any selected modules
-      document.getElementById('uploadArea').innerHTML = '<p class="text-xl font-semibold text-red-600">No migration needed for any selected adapters.</p>';
-    }
-  }
-
-  // Function to display the modal if the selected modules include Citizens
-  function displayMigrationModal() {
-    const modal = document.getElementById('migrationModal');
-    modal.style.display = "block";
-    modalDisplayed = true;
-
-    // Add event listeners to the modal buttons
-    document.getElementById('migrateAllNpcsBtn').addEventListener('click', function() {
-      MigrationMode = 'all'; // Set MigrationMode to 'all'
-      closeModal();
-    });
-
-    document.getElementById('migrateTypewriterNpcsBtn').addEventListener('click', function() {
-      MigrationMode = 'typewriterOnly'; // Set MigrationMode to 'typewriterOnly'
-      closeModal();
-    });
-  }
-
-  // Function to close the modal
-  function closeModal() {
-    const modal = document.getElementById('migrationModal');
-    modal.style.display = "none";
-    modalDisplayed = false;
-  }
-
-  // Function to migrate all NPCs
-  function migrateAllNpcs() {
-    migrateAll = true;
-    closeModal();
-  }
-
-  // Function to migrate NPCs used by Typewriter
-  function migrateTypewriterNpcs() {
-    migrateTypewriter = true;
-    closeModal();
-  }
-
-  // Function to display selected modules
-  function displaySelectedModules(selectedModules) {
-    const fileList = document.getElementById('fileList');
-    fileList.innerHTML = ''; // Clear the file list
-    selectedModules.forEach(function(fileName, index) {
-      const listItem = document.createElement('li');
-      listItem.classList.add("flex", "items-center", "transition", "transform", "ease-in-out", "duration-300", "hover:scale-105", "delay-800", "animate__animated", "animate__fadeIn", "animate__delay-" + (index + 1), "animate__slideInFromTop");
-
-      const checkbox = document.createElement('input');
-      checkbox.type = "checkbox";
-      checkbox.name = "file";
-      checkbox.value = fileName;
-      checkbox.checked = true;
-      checkbox.disabled = true;
-      listItem.appendChild(checkbox);
-
-      const textNode = document.createTextNode(formatFileName(fileName));
-      if (textNode) { // Only append text if it's not null
-        const textContainer = document.createElement('span');
-        textContainer.appendChild(textNode);
-        textContainer.classList.add("ml-2"); // Adding margin between checkbox and text
-        listItem.appendChild(textContainer);
+        document
+          .getElementById("migrateTypewriterNpcsBtn")
+          .addEventListener("click", function () {
+            MigrationMode = "typewriterOnly"; // Set MigrationMode to 'typewriterOnly'
+            closeModal();
+          });
       }
 
-      const uploadButton = document.createElement('button');
-      uploadButton.textContent = "Upload";
-      uploadButton.classList.add("btn");
-      uploadButton.style.marginTop = "1rem";
+      // Function to close the modal
+      function closeModal() {
+        const modal = document.getElementById("migrationModal");
+        modal.style.display = "none";
+        modalDisplayed = false;
+      }
 
-      // Check if migration is needed for this module
-      const needsMigration = migratableModules.some(m => fileName.includes(m));
-      if (needsMigration) {
-        uploadButton.addEventListener('click', function() {
-          const fileInput = document.createElement('input');
-          fileInput.type = "file";
-          fileInput.addEventListener('change', function() {
-            const file = this.files[0];
-            if (!file) return;
-            // Handle file upload
-            console.log("Uploading file:", file);
-            if (fileName.includes("Citizens")) {
-              console.log("Citizens upload detected");
-            }
-            if (file.name === "saves.yml") {
-              const reader = new FileReader();
-              reader.onload = function(event) {
-                const yamlContent = event.target.result;
-                try {
-                  jsonData = jsyaml.load(yamlContent); // Parse YAML to JSON
-                  let savesContent = yamlContent; // Store the JSON content in a global variable
-                  console.log(jsonData); // Output JSON to console
-                } catch (error) {
-                  console.error("Error parsing YAML:", error);
+      // Function to migrate all NPCs
+      function migrateAllNpcs() {
+        migrateAll = true;
+        closeModal();
+      }
+
+      // Function to migrate NPCs used by Typewriter
+      function migrateTypewriterNpcs() {
+        migrateTypewriter = true;
+        closeModal();
+      }
+
+      // Function to display selected modules
+      function displaySelectedModules(selectedModules) {
+        const fileList = document.getElementById("fileList");
+        fileList.innerHTML = ""; // Clear the file list
+        selectedModules.forEach(function (fileName, index) {
+          const listItem = document.createElement("li");
+          listItem.classList.add(
+            "flex",
+            "items-center",
+            "transition",
+            "transform",
+            "ease-in-out",
+            "duration-300",
+            "hover:scale-105",
+            "delay-800",
+            "animate__animated",
+            "animate__fadeIn",
+            "animate__delay-" + (index + 1),
+            "animate__slideInFromTop",
+          );
+
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.name = "file";
+          checkbox.value = fileName;
+          checkbox.checked = true;
+          checkbox.disabled = true;
+          listItem.appendChild(checkbox);
+
+          const textNode = document.createTextNode(formatFileName(fileName));
+          if (textNode) {
+            // Only append text if it's not null
+            const textContainer = document.createElement("span");
+            textContainer.appendChild(textNode);
+            textContainer.classList.add("ml-2"); // Adding margin between checkbox and text
+            listItem.appendChild(textContainer);
+          }
+
+          const uploadButton = document.createElement("button");
+          uploadButton.textContent = "Upload";
+          uploadButton.classList.add("btn");
+          uploadButton.style.marginTop = "1rem";
+
+          // Check if migration is needed for this module
+          const needsMigration = migratableModules.some((m) =>
+            fileName.includes(m),
+          );
+          if (needsMigration) {
+            uploadButton.addEventListener("click", function () {
+              const fileInput = document.createElement("input");
+              fileInput.type = "file";
+              fileInput.addEventListener("change", function () {
+                const file = this.files[0];
+                if (!file) return;
+                // Handle file upload
+                console.log("Uploading file:", file);
+                if (fileName.includes("Citizens")) {
+                  console.log("Citizens upload detected");
                 }
-              };
-              reader.readAsText(file);
-            }
-          });
-          fileInput.click(); // Trigger file input click when button is clicked
-        });
-      } else {
-        uploadButton.textContent = "No migration needed";
-        uploadButton.classList.add("no-migration-needed"); // Style the button red
-        uploadButton.disabled = true;
-      }
-
-      listItem.appendChild(uploadButton);
-
-      fileList.appendChild(listItem);
-    });
-  }
-  function createNpcChecklists(jsonData) {
-    const npcData = jsonData.npc;
-    const npcModal = document.getElementById('npcModal');
-    const npcList = document.getElementById('npcList');
-
-    // Clear previous NPC list
-    npcList.innerHTML = '';
-
-    for (const npcId in npcData) {
-      if (npcData.hasOwnProperty(npcId)) {
-        const npc = npcData[npcId];
-        const npcContainer = document.createElement('div');
-        npcContainer.classList.add("npc-container");
-
-        const npcInfoContainer = document.createElement('div');
-        npcInfoContainer.classList.add("npc-info-container");
-
-        // Create a checkbox for the NPC
-        const checkbox = document.createElement('input');
-        checkbox.type = "checkbox";
-        checkbox.name = "npc-checkbox";
-        checkbox.value = npcId;
-
-        // Determine if all NPCs should be selected based on migration mode
-        if (MigrationMode === 'all') {
-          console.log(typeof npcIds[0])
-          if (npcIds.includes(parseInt(npcId))) {
-            console.log("success")
-            checkbox.checked = true;
-          }
-        }
-
-        //if MigrationMode is set to "typewriterOnly" only the NPCs with the id in the array npcIds will be selected
-        else if (MigrationMode === 'typewriterOnly') {
-          if (npcIds.includes(npcId)) {
-            checkbox.checked = true;
-          }
-        }
-
-        // Append the checkbox to the NPC info container
-        npcInfoContainer.appendChild(checkbox);
-
-        // Base64 decode the textureRaw property if it exists
-        if (npc.traits && npc.traits.skintrait && npc.traits.skintrait.textureRaw && npc.traits.type == "PLAYER") {
-          const textureRaw = atob(npc.traits.skintrait.textureRaw);
-          try {
-            const textures = JSON.parse(textureRaw);
-            const headUrl = textures.textures.SKIN.url.replace("http://textures.minecraft.net/texture/", "https://nmsr.nickac.dev/head/");
-            const fullBodyUrl = textures.textures.SKIN.url.replace("http://textures.minecraft.net/texture/", "https://nmsr.nickac.dev/fullbody/");
-
-            // Create an image element for the NPC's head
-            const npcImage = document.createElement('img');
-            npcImage.src = headUrl;
-            npcImage.alt = `NPC ${npcId} Head`;
-
-            // Apply CSS styling to adjust the size of the image and transition effect
-            npcImage.classList.add('npc-image');
-            npcImage.style.width = "50px"; // Set initial width
-            npcImage.style.height = "auto"; // Maintain aspect ratio
-            // Add transition effect with delay for translateY
-            npcImage.style.transition = "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
-
-            // Apply CSS styling to adjust the size and position of the image and transition effect
-            npcImage.classList.add('npc-image');
-            npcImage.style.width = "50px"; // Set initial width
-            npcImage.style.height = "auto"; // Maintain aspect ratio
-            // Add transition effect with delay for translateY
-            npcImage.style.transition = "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
-
-            // Add event listeners for hover behavior on the entire NPC container
-            npcContainer.addEventListener('mouseenter', function () {
-              // Delay the switch to full body and increase size
-              setTimeout(function () {
-                npcImage.src = fullBodyUrl; // Change the image source to full-body version
-                npcImage.style.width = "100px"; // Decrease width
+                if (file.name === "saves.yml") {
+                  const reader = new FileReader();
+                  reader.onload = function (event) {
+                    const yamlContent = event.target.result;
+                    try {
+                      jsonData = jsyaml.load(yamlContent); // Parse YAML to JSON
+                      let savesContent = yamlContent; // Store the JSON content in a global variable
+                      console.log(jsonData); // Output JSON to console
+                    } catch (error) {
+                      console.error("Error parsing YAML:", error);
+                    }
+                  };
+                  reader.readAsText(file);
+                }
               });
+              fileInput.click(); // Trigger file input click when button is clicked
             });
-
-            npcContainer.addEventListener('mouseleave', function () {
-              // Reset transform and size
-              npcImage.style.transform = "translateY(0)";
-              npcImage.src = headUrl; // Change back to head version
-              npcImage.style.width = "50px"; // Reset width
-            });
-
-            // Append the image to the NPC info container
-            npcInfoContainer.appendChild(npcImage);
-            console.log(npc.name)
-            console.log(npc.traits.type)
-          } catch (error) {
-            console.error('Error parsing textureRaw JSON:'+ npc.name, error, npc.name);
+          } else {
+            uploadButton.textContent = "No migration needed";
+            uploadButton.classList.add("no-migration-needed"); // Style the button red
+            uploadButton.disabled = true;
           }
-        }
 
-          //Check if the NPC is a "VILLAGER"
+          listItem.appendChild(uploadButton);
+
+          fileList.appendChild(listItem);
+        });
+      }
+      function createNpcChecklists(jsonData) {
+        const npcData = jsonData.npc;
+        const npcModal = document.getElementById("npcModal");
+        const npcList = document.getElementById("npcList");
+
+        // Clear previous NPC list
+        npcList.innerHTML = "";
+
+        for (const npcId in npcData) {
+          if (npcData.hasOwnProperty(npcId)) {
+            const npc = npcData[npcId];
+            const npcContainer = document.createElement("div");
+            npcContainer.classList.add("npc-container");
+
+            const npcInfoContainer = document.createElement("div");
+            npcInfoContainer.classList.add("npc-info-container");
+
+            // Create a checkbox for the NPC
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.name = "npc-checkbox";
+            checkbox.value = npcId;
+
+            // Determine if all NPCs should be selected based on migration mode
+            if (MigrationMode === "all") {
+              console.log(typeof npcIds[0]);
+              if (npcIds.includes(parseInt(npcId))) {
+                console.log("success");
+                checkbox.checked = true;
+              }
+            }
+
+            //if MigrationMode is set to "typewriterOnly" only the NPCs with the id in the array npcIds will be selected
+            else if (MigrationMode === "typewriterOnly") {
+              if (npcIds.includes(npcId)) {
+                checkbox.checked = true;
+              }
+            }
+
+            // Append the checkbox to the NPC info container
+            npcInfoContainer.appendChild(checkbox);
+
+            // Base64 decode the textureRaw property if it exists
+            if (
+              npc.traits &&
+              npc.traits.skintrait &&
+              npc.traits.skintrait.textureRaw &&
+              npc.traits.type == "PLAYER"
+            ) {
+              const textureRaw = atob(npc.traits.skintrait.textureRaw);
+              try {
+                const textures = JSON.parse(textureRaw);
+                const headUrl = textures.textures.SKIN.url.replace(
+                  "http://textures.minecraft.net/texture/",
+                  "https://nmsr.nickac.dev/head/",
+                );
+                const fullBodyUrl = textures.textures.SKIN.url.replace(
+                  "http://textures.minecraft.net/texture/",
+                  "https://nmsr.nickac.dev/fullbody/",
+                );
+
+                // Create an image element for the NPC's head
+                const npcImage = document.createElement("img");
+                npcImage.src = headUrl;
+                npcImage.alt = `NPC ${npcId} Head`;
+
+                // Apply CSS styling to adjust the size of the image and transition effect
+                npcImage.classList.add("npc-image");
+                npcImage.style.width = "50px"; // Set initial width
+                npcImage.style.height = "auto"; // Maintain aspect ratio
+                // Add transition effect with delay for translateY
+                npcImage.style.transition =
+                  "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
+
+                // Apply CSS styling to adjust the size and position of the image and transition effect
+                npcImage.classList.add("npc-image");
+                npcImage.style.width = "50px"; // Set initial width
+                npcImage.style.height = "auto"; // Maintain aspect ratio
+                // Add transition effect with delay for translateY
+                npcImage.style.transition =
+                  "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
+
+                // Add event listeners for hover behavior on the entire NPC container
+                npcContainer.addEventListener("mouseenter", function () {
+                  // Delay the switch to full body and increase size
+                  setTimeout(function () {
+                    npcImage.src = fullBodyUrl; // Change the image source to full-body version
+                    npcImage.style.width = "100px"; // Decrease width
+                  });
+                });
+
+                npcContainer.addEventListener("mouseleave", function () {
+                  // Reset transform and size
+                  npcImage.style.transform = "translateY(0)";
+                  npcImage.src = headUrl; // Change back to head version
+                  npcImage.style.width = "50px"; // Reset width
+                });
+
+                // Append the image to the NPC info container
+                npcInfoContainer.appendChild(npcImage);
+                console.log(npc.name);
+                console.log(npc.traits.type);
+              } catch (error) {
+                console.error(
+                  "Error parsing textureRaw JSON:" + npc.name,
+                  error,
+                  npc.name,
+                );
+              }
+            }
+
+            //Check if the NPC is a "VILLAGER"
             else if (npc.traits.type === "VILLAGER") {
-                let biome = "PLAINS";
-                let profession = "NONE";
-                try {
-                    if (npc.traits.villagertrait && typeof npc.traits.villagertrait.type !== 'undefined') {
-                        biome = npc.traits.villagertrait.type ?? "PLAINS";
-                    } else {
-                        biome = "PLAINS";
-                    }
-                    if (typeof npc.traits.profession !== 'undefined') {
-                        profession = npc.traits.profession ?? "NONE";
-                    } else {
-                        profession = "NONE";
-                    }
-                } catch (error) {
-                    console.error("Problem with NPC:" + npc.name, error);
+              let biome = "PLAINS";
+              let profession = "NONE";
+              try {
+                if (
+                  npc.traits.villagertrait &&
+                  typeof npc.traits.villagertrait.type !== "undefined"
+                ) {
+                  biome = npc.traits.villagertrait.type ?? "PLAINS";
+                } else {
+                  biome = "PLAINS";
                 }
-            
+                if (typeof npc.traits.profession !== "undefined") {
+                  profession = npc.traits.profession ?? "NONE";
+                } else {
+                  profession = "NONE";
+                }
+              } catch (error) {
+                console.error("Problem with NPC:" + npc.name, error);
+              }
+
               const headUrl = "images/villager/villager_head.png";
               let fullBodyUrl = "villager_full_body.png";
               if (biome === "DESERT") {
@@ -647,7 +751,8 @@
                 } else if (profession === "BUTCHER") {
                   fullBodyUrl = "images/villager/desert/desert_butcher.png";
                 } else if (profession === "CARTOGRAPHER") {
-                  fullBodyUrl = "images/villager/desert/desert_cartographer.png";
+                  fullBodyUrl =
+                    "images/villager/desert/desert_cartographer.png";
                 } else if (profession === "CLERIC") {
                   fullBodyUrl = "images/villager/desert/desert_cleric.png";
                 } else if (profession === "FARMER") {
@@ -657,7 +762,8 @@
                 } else if (profession === "FLETCHER") {
                   fullBodyUrl = "images/villager/desert/desert_fletcher.png";
                 } else if (profession === "LEATHERWORKER") {
-                  fullBodyUrl = "images/villager/desert/desert_leatherworker.png";
+                  fullBodyUrl =
+                    "images/villager/desert/desert_leatherworker.png";
                 } else if (profession === "LIBRARIAN") {
                   fullBodyUrl = "images/villager/desert/desert_librarian.png";
                 } else if (profession === "MASON") {
@@ -679,7 +785,8 @@
                 } else if (profession === "BUTCHER") {
                   fullBodyUrl = "images/villager/jungle/jungle_butcher.png";
                 } else if (profession === "CARTOGRAPHER") {
-                  fullBodyUrl = "images/villager/jungle/jungle_cartographer.png";
+                  fullBodyUrl =
+                    "images/villager/jungle/jungle_cartographer.png";
                 } else if (profession === "CLERIC") {
                   fullBodyUrl = "images/villager/jungle/jungle_cleric.png";
                 } else if (profession === "FARMER") {
@@ -689,7 +796,8 @@
                 } else if (profession === "FLETCHER") {
                   fullBodyUrl = "images/villager/jungle/jungle_fletcher.png";
                 } else if (profession === "LEATHERWORKER") {
-                  fullBodyUrl = "images/villager/jungle/jungle_leatherworker.png";
+                  fullBodyUrl =
+                    "images/villager/jungle/jungle_leatherworker.png";
                 } else if (profession === "LIBRARIAN") {
                   fullBodyUrl = "images/villager/jungle/jungle_librarian.png";
                 } else if (profession === "MASON") {
@@ -711,27 +819,35 @@
                 } else if (profession === "BUTCHER") {
                   fullBodyUrl = "images/villager/savannah/savannah_butcher.png";
                 } else if (profession === "CARTOGRAPHER") {
-                  fullBodyUrl = "images/villager/savannah/savannah_cartographer.png";
+                  fullBodyUrl =
+                    "images/villager/savannah/savannah_cartographer.png";
                 } else if (profession === "CLERIC") {
                   fullBodyUrl = "images/villager/savannah/savannah_cleric.png";
                 } else if (profession === "FARMER") {
                   fullBodyUrl = "images/villager/savannah/savannah_farmer.png";
                 } else if (profession === "FISHERMAN") {
-                  fullBodyUrl = "images/villager/savannah/savannah_fisherman.png";
+                  fullBodyUrl =
+                    "images/villager/savannah/savannah_fisherman.png";
                 } else if (profession === "FLETCHER") {
-                  fullBodyUrl = "images/villager/savannah/savannah_fletcher.png";
+                  fullBodyUrl =
+                    "images/villager/savannah/savannah_fletcher.png";
                 } else if (profession === "LEATHERWORKER") {
-                  fullBodyUrl = "images/villager/savannah/savannah_leatherworker.png";
+                  fullBodyUrl =
+                    "images/villager/savannah/savannah_leatherworker.png";
                 } else if (profession === "LIBRARIAN") {
-                  fullBodyUrl = "images/villager/savannah/savannah_librarian.png";
+                  fullBodyUrl =
+                    "images/villager/savannah/savannah_librarian.png";
                 } else if (profession === "MASON") {
                   fullBodyUrl = "images/villager/savannah/savannah_mason.png";
                 } else if (profession === "SHEPHERD") {
-                  fullBodyUrl = "images/villager/savannah/savannah_shepherd.png";
+                  fullBodyUrl =
+                    "images/villager/savannah/savannah_shepherd.png";
                 } else if (profession === "TOOLSMITH") {
-                  fullBodyUrl = "images/villager/savannah/savannah_toolsmith.png";
+                  fullBodyUrl =
+                    "images/villager/savannah/savannah_toolsmith.png";
                 } else if (profession === "WEAPONSMITH") {
-                  fullBodyUrl = "images/villager/savannah/savannah_weaponsmith.png";
+                  fullBodyUrl =
+                    "images/villager/savannah/savannah_weaponsmith.png";
                 } else if (profession === "NITWIT") {
                   fullBodyUrl = "images/villager/savannah/savannah_nitwit.png";
                 } else {
@@ -839,7 +955,8 @@
                 } else if (profession === "BUTCHER") {
                   fullBodyUrl = "images/villager/plains/plains_butcher.png";
                 } else if (profession === "CARTOGRAPHER") {
-                  fullBodyUrl = "images/villager/plains/plains_cartographer.png";
+                  fullBodyUrl =
+                    "images/villager/plains/plains_cartographer.png";
                 } else if (profession === "CLERIC") {
                   fullBodyUrl = "images/villager/plains/plains_cleric.png";
                 } else if (profession === "FARMER") {
@@ -849,7 +966,8 @@
                 } else if (profession === "FLETCHER") {
                   fullBodyUrl = "images/villager/plains/plains_fletcher.png";
                 } else if (profession === "LEATHERWORKER") {
-                  fullBodyUrl = "images/villager/plains/plains_leatherworker.png";
+                  fullBodyUrl =
+                    "images/villager/plains/plains_leatherworker.png";
                 } else if (profession === "LIBRARIAN") {
                   fullBodyUrl = "images/villager/plains/plains_librarian.png";
                 } else if (profession === "MASON") {
@@ -867,28 +985,29 @@
                 }
               }
 
-
               // Create an image element for the NPC's head
-              const npcImage = document.createElement('img');
+              const npcImage = document.createElement("img");
               npcImage.src = headUrl;
               npcImage.alt = `NPC ${npcId} Head`;
 
               // Apply CSS styling to adjust the size of the image and transition effect
-              npcImage.classList.add('npc-image');
+              npcImage.classList.add("npc-image");
               npcImage.style.width = "50px"; // Set initial width
               npcImage.style.height = "auto"; // Maintain aspect ratio
               // Add transition effect with delay for translateY
-              npcImage.style.transition = "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
+              npcImage.style.transition =
+                "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
 
               // Apply CSS styling to adjust the size and position of the image and transition effect
-              npcImage.classList.add('npc-image');
+              npcImage.classList.add("npc-image");
               npcImage.style.width = "50px"; // Set initial width
               npcImage.style.height = "auto"; // Maintain aspect ratio
               // Add transition effect with delay for translateY
-              npcImage.style.transition = "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
+              npcImage.style.transition =
+                "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
 
               // Add event listeners for hover behavior on the entire NPC container
-              npcContainer.addEventListener('mouseenter', function () {
+              npcContainer.addEventListener("mouseenter", function () {
                 // Delay the switch to full body and increase size
                 setTimeout(function () {
                   npcImage.src = fullBodyUrl; // Change the image source to full-body version
@@ -896,7 +1015,7 @@
                 });
               });
 
-              npcContainer.addEventListener('mouseleave', function () {
+              npcContainer.addEventListener("mouseleave", function () {
                 // Reset transform and size
                 npcImage.style.transform = "translateY(0)";
                 npcImage.src = headUrl; // Change back to head version
@@ -905,475 +1024,522 @@
 
               // Append the image to the NPC info container
               npcInfoContainer.appendChild(npcImage);
+            } else if (
+              npc.traits.type === "ZOMBIE" ||
+              npc.traits.type === "HUSK" ||
+              npc.traits.type === "PIGLIN" ||
+              npc.traits.type === "HOGLIN" ||
+              npc.traits.type === "PIGLIN_BRUTE" ||
+              npc.traits.type === "WARDEN" ||
+              npc.traits.type === "ENDERMAN" ||
+              npc.traits.type === "SKELETON" ||
+              npc.traits.type === "COW" ||
+              npc.traits.type === "IRON_GOLEM" ||
+              npc.traits.type === "WITCH"
+            ) {
+              try {
+                if (npc.traits.type === "ZOMBIE") {
+                  headUrl = "images/zombie/zombie_head.png";
+                  fullBodyUrl = "images/zombie/zombie_full_body.png";
+                }
+                if (npc.traits.type === "HUSK") {
+                  headUrl = "images/husk/husk_head.png";
+                  fullBodyUrl = "images/husk/husk_full_body.png";
+                }
+                if (npc.traits.type === "PIGLIN") {
+                  headUrl = "images/piglin/piglin_head.png";
+                  fullBodyUrl = "images/piglin/piglin_full_body.png";
+                }
+                if (npc.traits.type === "HOGLIN") {
+                  headUrl = "images/hoglin/hoglin_head.png";
+                  fullBodyUrl = "images/hoglin/hoglin_full_body.png";
+                }
+                if (npc.traits.type === "PIGLIN_BRUTE") {
+                  headUrl = "images/piglin_brute/piglin_brute_head.png";
+                  fullBodyUrl =
+                    "images/piglin_brute/piglin_brute_full_body.png";
+                }
+                if (npc.traits.type === "WARDEN") {
+                  headUrl = "images/warden/warden_head.png";
+                  fullBodyUrl = "images/warden/warden_full_body.png";
+                }
+                if (npc.traits.type === "ENDERMAN") {
+                  headUrl = "images/enderman/enderman_head.png";
+                  fullBodyUrl = "images/enderman/enderman_full_body.png";
+                }
+                if (npc.traits.type === "SKELETON") {
+                  headUrl = "images/skeleton/skeleton_head.png";
+                  fullBodyUrl = "images/skeleton/skeleton_full_body.png";
+                }
+                if (npc.traits.type === "COW") {
+                  headUrl = "images/cow/cow_head.png";
+                  fullBodyUrl = "images/cow/cow_full_body.png";
+                }
+                if (npc.traits.type === "IRON_GOLEM") {
+                  headUrl = "images/iron_golem/iron_golem_head.png";
+                  fullBodyUrl = "images/iron_golem/iron_golem_full_body.png";
+                }
+                if (npc.traits.type === "WITCH") {
+                  headUrl = "images/witch/witch_head.png";
+                  fullBodyUrl = "images/witch/witch_full_body.png";
+                }
 
-        } else if (npc.traits.type === "ZOMBIE" ||
-          npc.traits.type === "HUSK" ||
-          npc.traits.type === "PIGLIN" ||
-          npc.traits.type === "HOGLIN" ||
-          npc.traits.type === "PIGLIN_BRUTE" ||
-          npc.traits.type === "WARDEN" ||
-          npc.traits.type === "ENDERMAN" ||
-          npc.traits.type === "SKELETON" ||
-          npc.traits.type === "COW" ||
-          npc.traits.type === "IRON_GOLEM" ||
-          npc.traits.type === "WITCH") {
-          try {
-            if (npc.traits.type === "ZOMBIE") {
-              headUrl = "images/zombie/zombie_head.png";
-              fullBodyUrl = "images/zombie/zombie_full_body.png";
-            }
-            if (npc.traits.type === "HUSK") {
-              headUrl = "images/husk/husk_head.png";
-              fullBodyUrl = "images/husk/husk_full_body.png";
-            }
-            if (npc.traits.type === "PIGLIN") {
-              headUrl = "images/piglin/piglin_head.png";
-              fullBodyUrl = "images/piglin/piglin_full_body.png";
-            }
-            if (npc.traits.type === "HOGLIN") {
-              headUrl = "images/hoglin/hoglin_head.png";
-              fullBodyUrl = "images/hoglin/hoglin_full_body.png";
-            }
-            if (npc.traits.type === "PIGLIN_BRUTE") {
-              headUrl = "images/piglin_brute/piglin_brute_head.png";
-              fullBodyUrl = "images/piglin_brute/piglin_brute_full_body.png";
-            }
-            if (npc.traits.type === "WARDEN") {
-              headUrl = "images/warden/warden_head.png";
-              fullBodyUrl = "images/warden/warden_full_body.png";
-            }
-            if (npc.traits.type === "ENDERMAN") {
-              headUrl = "images/enderman/enderman_head.png";
-              fullBodyUrl = "images/enderman/enderman_full_body.png";
-            }
-            if (npc.traits.type === "SKELETON") {
-              headUrl = "images/skeleton/skeleton_head.png";
-              fullBodyUrl = "images/skeleton/skeleton_full_body.png";
-            }
-            if (npc.traits.type === "COW") {
-              headUrl = "images/cow/cow_head.png";
-              fullBodyUrl = "images/cow/cow_full_body.png";
-            }
-            if (npc.traits.type === "IRON_GOLEM") {
-              headUrl = "images/iron_golem/iron_golem_head.png";
-              fullBodyUrl = "images/iron_golem/iron_golem_full_body.png";
-            }
-            if (npc.traits.type === "WITCH") {
-              headUrl = "images/witch/witch_head.png";
-              fullBodyUrl = "images/witch/witch_full_body.png";
+                // Create an image element for the NPC's head
+                const npcImage = document.createElement("img");
+                npcImage.src = headUrl;
+                npcImage.alt = `NPC ${npcId} Head`;
+
+                // Apply CSS styling to adjust the size of the image and transition effect
+                npcImage.classList.add("npc-image");
+                npcImage.style.width = "50px"; // Set initial width
+                npcImage.style.height = "auto"; // Maintain aspect ratio
+                // Add transition effect with delay for translateY
+                npcImage.style.transition =
+                  "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
+
+                // Apply CSS styling to adjust the size and position of the image and transition effect
+                npcImage.classList.add("npc-image");
+                npcImage.style.width = "50px"; // Set initial width
+                npcImage.style.height = "auto"; // Maintain aspect ratio
+                // Add transition effect with delay for translateY
+                npcImage.style.transition =
+                  "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
+
+                // Add event listeners for hover behavior on the entire NPC container
+                npcContainer.addEventListener("mouseenter", function () {
+                  // Delay the switch to full body and increase size
+                  setTimeout(function () {
+                    npcImage.src = fullBodyUrl; // Change the image source to full-body version
+                    npcImage.style.width = "100px"; // Decrease width
+                  });
+                });
+
+                npcContainer.addEventListener("mouseleave", function () {
+                  // Reset transform and size
+                  npcImage.style.transform = "translateY(0)";
+                  npcImage.src = headUrl; // Change back to head version
+                  npcImage.style.width = "50px"; // Reset width
+                });
+
+                // Append the image to the NPC info container
+                npcInfoContainer.appendChild(npcImage);
+              } catch (error) {
+                console.error("Error parsing textureRaw JSON:", error);
+              }
+            } else {
+              console.log(npc);
             }
 
+            // Create an unordered list for NPC details
+            const detailsList = document.createElement("ul");
 
-            // Create an image element for the NPC's head
-            const npcImage = document.createElement('img');
-            npcImage.src = headUrl;
-            npcImage.alt = `NPC ${npcId} Head`;
+            // Add world and coordinates as bullet points
+            const worldItem = document.createElement("li");
+            worldItem.textContent = `World: ${npc.traits.location.world}`;
 
-            // Apply CSS styling to adjust the size of the image and transition effect
-            npcImage.classList.add('npc-image');
-            npcImage.style.width = "50px"; // Set initial width
-            npcImage.style.height = "auto"; // Maintain aspect ratio
-            // Add transition effect with delay for translateY
-            npcImage.style.transition = "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
+            const xCoordItem = document.createElement("li");
+            xCoordItem.textContent = `X: ${npc.traits.location.x}`;
 
-            // Apply CSS styling to adjust the size and position of the image and transition effect
-            npcImage.classList.add('npc-image');
-            npcImage.style.width = "50px"; // Set initial width
-            npcImage.style.height = "auto"; // Maintain aspect ratio
-            // Add transition effect with delay for translateY
-            npcImage.style.transition = "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
+            const yCoordItem = document.createElement("li");
+            yCoordItem.textContent = `Y: ${npc.traits.location.y}`;
 
-            // Add event listeners for hover behavior on the entire NPC container
-            npcContainer.addEventListener('mouseenter', function () {
-              // Delay the switch to full body and increase size
-              setTimeout(function () {
-                npcImage.src = fullBodyUrl; // Change the image source to full-body version
-                npcImage.style.width = "100px"; // Decrease width
-              });
-            });
+            const zCoordItem = document.createElement("li");
+            zCoordItem.textContent = `Z: ${npc.traits.location.z}`;
 
-            npcContainer.addEventListener('mouseleave', function () {
-              // Reset transform and size
-              npcImage.style.transform = "translateY(0)";
-              npcImage.src = headUrl; // Change back to head version
-              npcImage.style.width = "50px"; // Reset width
-            });
+            // Append details to the list
+            detailsList.appendChild(worldItem);
+            detailsList.appendChild(xCoordItem);
+            detailsList.appendChild(yCoordItem);
+            detailsList.appendChild(zCoordItem);
 
-            // Append the image to the NPC info container
-            npcInfoContainer.appendChild(npcImage);
-          } catch (error) {
-            console.error('Error parsing textureRaw JSON:', error);
+            // Append the details list to the NPC info container
+            npcInfoContainer.appendChild(detailsList);
+
+            // Create a label for the NPC name
+            const nameLabel = document.createElement("label");
+            nameLabel.textContent = `NPC ${npcId}: ${npc.name}`;
+
+            // Create a label for the NPC type
+            const typeLabel = document.createElement("label");
+            typeLabel.textContent = `,   Type: ${npc.traits.type}`;
+
+            // Append the name label to the NPC info container
+            npcInfoContainer.appendChild(nameLabel);
+
+            // Append the NPC info container to the NPC container
+            npcContainer.appendChild(npcInfoContainer);
+
+            // Append the type label to the NPC info container
+            npcInfoContainer.appendChild(typeLabel);
+
+            // Append the NPC container to the NPC list
+            npcList.appendChild(npcContainer);
           }
-        } else {
-          console.log(npc)
+        }
+        // Display the modal
+        npcModal.style.display = "block";
+        modalDisplayed = true;
+
+        // Add event listener to the confirm selection button
+        document
+          .getElementById("confirmNpcSelection")
+          .addEventListener("click", function () {
+            // Close the modal
+            npcModal.style.display = "none";
+            modalDisplayed = false;
+
+            // Process the selected NPCs
+            processSelectedNPCs();
+          });
+
+        const hashLength = 12; // Length of the hashed ID
+
+        function generateHash(input, prefix) {
+          // Concatenate the NPC ID and name
+          const concatenated = input.id + input.name;
+
+          // Encode to base64
+          const encoded = btoa(concatenated);
+
+          // Crop the hashed string to the desired length
+          const cropped = encoded.substring(0, hashLength);
+
+          // Add prefix
+          const idWithPrefix = prefix + cropped;
+
+          return idWithPrefix;
         }
 
-        // Create an unordered list for NPC details
-        const detailsList = document.createElement('ul');
+        function processSelectedNPCs() {
+          const selectedNPCs = document.querySelectorAll(
+            'input[name="npc-checkbox"]:checked',
+          );
+          const selNPC = Array.from(selectedNPCs);
+          selectedNPCs.forEach((npc) => {
+            const npcId = npc.value;
+            const npcData = jsonData.npc[npcId];
+            const npcName = npcData.name;
 
-        // Add world and coordinates as bullet points
-        const worldItem = document.createElement('li');
-        worldItem.textContent = `World: ${npc.traits.location.world}`;
+            // Generate hashed ID for definition and instance with "i" and "d" prefixes
+            let definitionId = generateHash({ id: npcId, name: npcName }, "d");
+            let instanceId = generateHash({ id: npcId, name: npcName }, "i");
+            let glowingEffectId = generateHash(
+              { id: npcId, name: npcName },
+              "glo-d",
+            );
+            let ageableId = generateHash({ id: npcId, name: npcName }, "age-d");
 
-        const xCoordItem = document.createElement('li');
-        xCoordItem.textContent = `X: ${npc.traits.location.x}`;
+            // Extract NPC traits with default values if missing
+            const traits = npcData.traits || {};
+            const location = traits.location || {};
 
-        const yCoordItem = document.createElement('li');
-        yCoordItem.textContent = `Y: ${npc.traits.location.y}`;
+            let npcObject;
+            let currentNpcId = npcId;
 
-        const zCoordItem = document.createElement('li');
-        zCoordItem.textContent = `Z: ${npc.traits.location.z}`;
+            // Find the npc entry in npcIdEntryArray
+            const npcEntry = npcIdEntryArray.find(
+              (entry) => entry.npcId === currentNpcId,
+            );
 
-        // Append details to the list
-        detailsList.appendChild(worldItem);
-        detailsList.appendChild(xCoordItem);
-        detailsList.appendChild(yCoordItem);
-        detailsList.appendChild(zCoordItem);
+            // Log the current NPC ID and the found entry
+            console.log("Current NPC ID:", currentNpcId);
+            console.log("Found NPC Entry:", npcEntry);
 
-        // Append the details list to the NPC info container
-        npcInfoContainer.appendChild(detailsList);
+            // If found, set the definitionId
+            if (npcEntry) {
+              const definitionId = npcEntry.npcEntryId;
+              console.log("Definition ID set:", definitionId);
+              return definitionId;
+            } else {
+              console.log("NPC ID not found in npcIdEntryArray");
+              console.log(npcIdEntryArray);
+              return null;
+            }
 
-        // Create a label for the NPC name
-        const nameLabel = document.createElement('label');
-        nameLabel.textContent = `NPC ${npcId}: ${npc.name}`;
+            // Check if NPC type is "PLAYER"
+            if (npcData.traits.type === "PLAYER") {
+              // Extract relevant traits
+              const skintrait = traits.skintrait || {};
+              // Create JSON object for PLAYER NPC data
+              npcObject = {
+                name: npcName,
+                type: "manifest",
+                entries: [
+                  {
+                    id: definitionId,
+                    name: npcName + "_definition",
+                    displayName: npcName,
+                    sound: {
+                      soundId: { type: "default", value: "" },
+                      soundSource: {
+                        type: "self",
+                        entryId: "",
+                        location: {
+                          world: "",
+                          x: 0,
+                          y: 0,
+                          z: 0,
+                          yaw: 0,
+                          pitch: 0,
+                        },
+                      },
+                      track: "MASTER",
+                      volume: 0,
+                      pitch: 0,
+                    },
+                    skin: {
+                      texture: skintrait.textureRaw || "",
+                      signature: skintrait.signature || "",
+                    },
+                    data: [],
+                    type: "npc_definition",
+                  },
+                  {
+                    id: instanceId,
+                    name: npcName + "_instance",
+                    definition: definitionId,
+                    spawnLocation: {
+                      world: location.world || "world",
+                      x: location.x || 0,
+                      y: location.y || 0,
+                      z: location.z || 0,
+                      yaw: location.yaw || 0,
+                      pitch: location.pitch || 0,
+                    },
+                    data: [],
+                    activities: [],
+                    type: "npc_instance",
+                  },
+                ],
+                chapter: "migrated",
+                priority: 0,
+                version: "0.5.0-beta-79",
+              };
+              checkData(npcData);
+            } else if (npcData.traits.type === "VILLAGER") {
+              // Extract relevant traits
+              const villagerType = traits.villagertrait.type || "";
+              const profession = traits.profession || "";
+              const level = npcData.traits.villagertrait
+                ? mapVillagerLevel(npcData.traits.villagertrait.level)
+                : "";
 
-        // Create a label for the NPC type
-        const typeLabel = document.createElement('label');
-        typeLabel.textContent = `,   Type: ${npc.traits.type}`;
+              // Function to map villager level number to string
+              function mapVillagerLevel(level) {
+                switch (parseInt(level)) {
+                  case 1:
+                    return "NOVICE";
+                  case 2:
+                    return "APPRENTICE";
+                  case 3:
+                    return "JOURNEYMAN";
+                  case 4:
+                    return "EXPERT";
+                  case 5:
+                    return "MASTER";
+                  default:
+                    return "";
+                }
+              }
 
-        // Append the name label to the NPC info container
-        npcInfoContainer.appendChild(nameLabel);
+              // Create JSON object for NPC data
+              npcObject = {
+                name: npcName.toLowerCase(),
+                type: "manifest",
+                entries: [
+                  {
+                    id: instanceId,
+                    name: npcName.toLowerCase() + "_instance",
+                    definition: definitionId,
+                    spawnLocation: {
+                      world: traits.location.world || "",
+                      x: parseFloat(traits.location.x) || 0,
+                      y: parseFloat(traits.location.y) || 0,
+                      z: parseFloat(traits.location.z) || 0,
+                      yaw: parseFloat(traits.location.yaw) || 0,
+                      pitch: parseFloat(traits.location.pitch) || 0,
+                    },
+                    data: [],
+                    activities: [],
+                    type: "villager_instance",
+                  },
+                  {
+                    id: definitionId,
+                    name: npcName.toLowerCase() + "_definition",
+                    displayName: npcName,
+                    sound: {
+                      soundId: { type: "default", value: "" },
+                      soundSource: {
+                        type: "self",
+                        entryId: "",
+                        location: {
+                          world: "",
+                          x: 0,
+                          y: 0,
+                          z: 0,
+                          yaw: 0,
+                          pitch: 0,
+                        },
+                      },
+                      track: "MASTER",
+                      volume: 0,
+                      pitch: 0,
+                    },
+                    data: [generateHash({ id: npcId, name: npcName }, "B")],
+                    type: "villager_definition",
+                  },
+                  {
+                    id: generateHash({ id: npcId, name: npcName }, "B"),
+                    name: npcName.toLowerCase() + "_data",
+                    villagerType: villagerType.toUpperCase(),
+                    profession: profession.toUpperCase(),
+                    level: level,
+                    priorityOverride: { enabled: false, value: 0 },
+                    type: "villager_data",
+                  },
+                ],
+                chapter: "migrated",
+                priority: 0,
+                version: "0.5.0-beta-79",
+              };
+              checkData(npcData);
+            } else if (
+              npcData.traits.type === "ZOMBIE" ||
+              npcData.traits.type === "HUSK" ||
+              npcData.traits.type === "PIGLIN" ||
+              npcData.traits.type === "HOGLIN" ||
+              npcData.traits.type === "PIGLIN_BRUTE" ||
+              npcData.traits.type === "WARDEN" ||
+              npcData.traits.type === "ENDERMAN" ||
+              npcData.traits.type === "SKELETON" ||
+              npcData.traits.type === "COW" ||
+              npcData.traits.type === "IRON_GOLEM" ||
+              npcData.traits.type === "WITCH"
+            ) {
+              // Create JSON object for NPC data
+              npcObject = {
+                name: npcName.toLowerCase(),
+                type: "manifest",
+                entries: [
+                  {
+                    id: instanceId,
+                    name: npcName.toLowerCase() + "_instance",
+                    definition: definitionId,
+                    spawnLocation: {
+                      world: traits.location.world || "",
+                      x: parseFloat(traits.location.x) || 0,
+                      y: parseFloat(traits.location.y) || 0,
+                      z: parseFloat(traits.location.z) || 0,
+                      yaw: parseFloat(traits.location.yaw) || 0,
+                      pitch: parseFloat(traits.location.pitch) || 0,
+                    },
+                    data: [],
+                    activities: [],
+                    type: npcData.traits.type.toLowerCase() + "_instance",
+                  },
+                  {
+                    id: definitionId,
+                    name: npcName.toLowerCase() + "_definition",
+                    displayName: npcName,
+                    sound: {
+                      soundId: { type: "default", value: "" },
+                      soundSource: {
+                        type: "self",
+                        entryId: "",
+                        location: {
+                          world: "",
+                          x: 0,
+                          y: 0,
+                          z: 0,
+                          yaw: 0,
+                          pitch: 0,
+                        },
+                      },
+                      track: "MASTER",
+                      volume: 0,
+                      pitch: 0,
+                    },
+                    data: [],
+                    type: npcData.traits.type.toLowerCase() + "_definition",
+                  },
+                ],
+                chapter: "migrated",
+                priority: 0,
+                version: "0.5.0-beta-79",
+              };
+              checkData(npcData);
+            } else {
+              alert(
+                "NPC type not supported: " +
+                  npcData.traits.type +
+                  "\nPlease report this in the typewriter discord server.",
+              );
+            }
+            //funcion for checking for data
+            function checkData(data) {
+              // Check if NPC has glowing trait and add glowing effect data to the data list
+              if (
+                npcData &&
+                npcData.metadata &&
+                npcData.metadata.glowing === true
+              ) {
+                npcObject.entries.push({
+                  id: glowingEffectId,
+                  name: npcName.toLowerCase() + "_glowing_effect_data",
+                  glowing: true,
+                  priorityOverride: { enabled: false, value: 0 },
+                  type: "glowing_effect_data",
+                });
+                // Add glowing effect ID to the data list
+                npcObject.entries[0].data.push(glowingEffectId);
+              }
+              if (npcData.traits.age.age < 0) {
+                npcObject.entries.push({
+                  id: ageableId,
+                  name: npcName.toLowerCase() + "_ageable_data",
+                  baby: true,
+                  priorityOverride: { enabled: false, value: 0 },
+                  type: "ageable_data",
+                });
+                // Add ageable effect ID to the data list
+                npcObject.entries[0].data.push(ageableId);
+              } else {
+              }
+            }
+            // Create a Blob object containing the JSON data
+            const blob = new Blob([JSON.stringify(npcObject, null, 2)], {
+              type: "application/json",
+            });
 
-        // Append the NPC info container to the NPC container
-        npcContainer.appendChild(npcInfoContainer);
+            // Create a download link
+            const downloadLink = document.createElement("a");
+            downloadLink.href = URL.createObjectURL(blob);
+            downloadLink.download = npcName + ".json";
+            downloadLink.click();
+            delete jsonData.npc[npcId];
+          });
 
-        // Append the type label to the NPC info container
-        npcInfoContainer.appendChild(typeLabel);
+          const yamlData = jsyaml.dump(jsonData, { lineWidth: -1 });
+          console.log(yamlData); // Output YAML to console
+          //download the yaml file
+          const yamlBlob = new Blob([yamlData], { type: "application/yaml" });
+          const yamlDownloadLink = document.createElement("a");
+          yamlDownloadLink.href = URL.createObjectURL(yamlBlob);
+          yamlDownloadLink.download = "saves.yml";
+          yamlDownloadLink.click();
 
-        // Append the NPC container to the NPC list
-        npcList.appendChild(npcContainer);
+          // After processing NPCs and updating pages
+          pagesData.forEach((page, index) => {
+            const pageBlob = new Blob([JSON.stringify(page.content, null, 2)], {
+              type: "application/json",
+            });
+            const pageDownloadLink = document.createElement("a");
+            pageDownloadLink.href = URL.createObjectURL(pageBlob);
+            pageDownloadLink.download = `modified_${page.name}`;
+            pageDownloadLink.click();
+          });
+        }
       }
-    }
-    // Display the modal
-    npcModal.style.display = "block";
-    modalDisplayed = true;
-
-    // Add event listener to the confirm selection button
-    document.getElementById('confirmNpcSelection').addEventListener('click', function () {
-      // Close the modal
-      npcModal.style.display = "none";
-      modalDisplayed = false;
-
-      // Process the selected NPCs
-      processSelectedNPCs();
-    });
-
-    const hashLength = 12; // Length of the hashed ID
-
-    function generateHash(input, prefix) {
-      // Concatenate the NPC ID and name
-      const concatenated = input.id + input.name;
-
-      // Encode to base64
-      const encoded = btoa(concatenated);
-
-      // Crop the hashed string to the desired length
-      const cropped = encoded.substring(0, hashLength);
-
-      // Add prefix
-      const idWithPrefix = prefix + cropped;
-
-      return idWithPrefix;
-    }
-
-    function processSelectedNPCs() {
-      const selectedNPCs = document.querySelectorAll('input[name="npc-checkbox"]:checked');
-      const selNPC = Array.from(selectedNPCs);
-      selectedNPCs.forEach(npc => {
-        const npcId = npc.value;
-        const npcData = jsonData.npc[npcId];
-        const npcName = npcData.name;
-
-        // Generate hashed ID for definition and instance with "i" and "d" prefixes
-        let definitionId = generateHash({id: npcId, name: npcName}, "d");
-        let instanceId = generateHash({id: npcId, name: npcName}, "i");
-        let glowingEffectId = generateHash({id: npcId, name: npcName}, "glo-d");
-        let ageableId = generateHash({id: npcId, name: npcName}, "age-d");
-
-        // Extract NPC traits with default values if missing
-        const traits = npcData.traits || {};
-        const location = traits.location || {};
-
-        let npcObject;
-        let currentNpcId = npcId;
-
-        // Find the npc entry in npcIdEntryArray
-        const npcEntry = npcIdEntryArray.find(entry => entry.npcId === currentNpcId);
-
-        // Log the current NPC ID and the found entry
-        console.log("Current NPC ID:", currentNpcId);
-        console.log("Found NPC Entry:", npcEntry);
-
-        // If found, set the definitionId
-        if (npcEntry) {
-          const definitionId = npcEntry.npcEntryId;
-          console.log("Definition ID set:", definitionId);
-          return definitionId;
-        } else {
-          console.log("NPC ID not found in npcIdEntryArray");
-          console.log(npcIdEntryArray)
-          return null;
-        }
-
-        // Check if NPC type is "PLAYER"
-        if (npcData.traits.type === "PLAYER") {
-          // Extract relevant traits
-          const skintrait = traits.skintrait || {};
-          // Create JSON object for PLAYER NPC data
-          npcObject = {
-            name: npcName,
-            type: "manifest",
-            entries: [
-              {
-                id: definitionId,
-                name: npcName + "_definition",
-                displayName: npcName,
-                sound: {
-                  soundId: {type: "default", value: ""},
-                  soundSource: {
-                    type: "self",
-                    entryId: "",
-                    location: {world: "", x: 0, y: 0, z: 0, yaw: 0, pitch: 0}
-                  },
-                  track: "MASTER",
-                  volume: 0,
-                  pitch: 0
-                },
-                skin: {
-                  texture: skintrait.textureRaw || "",
-                  signature: skintrait.signature || ""
-                },
-                data: [],
-                type: "npc_definition"
-              },
-              {
-                id: instanceId,
-                name: npcName + "_instance",
-                definition: definitionId,
-                spawnLocation: {
-                  world: location.world || "world",
-                  x: location.x || 0,
-                  y: location.y || 0,
-                  z: location.z || 0,
-                  yaw: location.yaw || 0,
-                  pitch: location.pitch || 0
-                },
-                data: [],
-                activities: [],
-                type: "npc_instance"
-              }
-            ],
-            chapter: "migrated",
-            priority: 0,
-            version: "0.5.0-beta-79"
-          };
-          checkData(npcData);
-        } else if (npcData.traits.type === "VILLAGER") {
-          // Extract relevant traits
-          const villagerType = traits.villagertrait.type || "";
-          const profession = traits.profession || "";
-          const level = npcData.traits.villagertrait ? mapVillagerLevel(npcData.traits.villagertrait.level) : "";
-
-          // Function to map villager level number to string
-          function mapVillagerLevel(level) {
-            switch (parseInt(level)) {
-              case 1:
-                return "NOVICE";
-              case 2:
-                return "APPRENTICE";
-              case 3:
-                return "JOURNEYMAN";
-              case 4:
-                return "EXPERT";
-              case 5:
-                return "MASTER";
-              default:
-                return "";
-            }
-          }
-
-          // Create JSON object for NPC data
-          npcObject = {
-            name: npcName.toLowerCase(),
-            type: "manifest",
-            entries: [
-              {
-                id: instanceId,
-                name: npcName.toLowerCase() + "_instance",
-                definition: definitionId,
-                spawnLocation: {
-                  world: traits.location.world || "",
-                  x: parseFloat(traits.location.x) || 0,
-                  y: parseFloat(traits.location.y) || 0,
-                  z: parseFloat(traits.location.z) || 0,
-                  yaw: parseFloat(traits.location.yaw) || 0,
-                  pitch: parseFloat(traits.location.pitch) || 0
-                },
-                data: [],
-                activities: [],
-                type: "villager_instance"
-              },
-              {
-                id: definitionId,
-                name: npcName.toLowerCase() + "_definition",
-                displayName: npcName,
-                sound: {
-                  soundId: {type: "default", value: ""},
-                  soundSource: {
-                    type: "self",
-                    entryId: "",
-                    location: {world: "", x: 0, y: 0, z: 0, yaw: 0, pitch: 0}
-                  },
-                  track: "MASTER",
-                  volume: 0,
-                  pitch: 0
-                },
-                data: [generateHash({id: npcId, name: npcName}, "B")],
-                type: "villager_definition"
-              },
-              {
-                id: generateHash({id: npcId, name: npcName}, "B"),
-                name: npcName.toLowerCase() + "_data",
-                villagerType: villagerType.toUpperCase(),
-                profession: profession.toUpperCase(),
-                level: level,
-                priorityOverride: {enabled: false, value: 0},
-                type: "villager_data"
-              }
-            ],
-            chapter: "migrated",
-            priority: 0,
-            version: "0.5.0-beta-79"
-          };
-          checkData(npcData);
-        } else if (npcData.traits.type === "ZOMBIE" ||
-          npcData.traits.type === "HUSK" ||
-          npcData.traits.type === "PIGLIN" ||
-          npcData.traits.type === "HOGLIN" ||
-          npcData.traits.type === "PIGLIN_BRUTE" ||
-          npcData.traits.type === "WARDEN" ||
-          npcData.traits.type === "ENDERMAN" ||
-          npcData.traits.type === "SKELETON" ||
-          npcData.traits.type === "COW" ||
-          npcData.traits.type === "IRON_GOLEM" ||
-          npcData.traits.type === "WITCH") {
-          // Create JSON object for NPC data
-          npcObject = {
-            name: npcName.toLowerCase(),
-            type: "manifest",
-            entries: [
-              {
-                id: instanceId,
-                name: npcName.toLowerCase() + "_instance",
-                definition: definitionId,
-                spawnLocation: {
-                  world: traits.location.world || "",
-                  x: parseFloat(traits.location.x) || 0,
-                  y: parseFloat(traits.location.y) || 0,
-                  z: parseFloat(traits.location.z) || 0,
-                  yaw: parseFloat(traits.location.yaw) || 0,
-                  pitch: parseFloat(traits.location.pitch) || 0
-                },
-                data: [],
-                activities: [],
-                type: npcData.traits.type.toLowerCase() + "_instance"
-              },
-              {
-                id: definitionId,
-                name: npcName.toLowerCase() + "_definition",
-                displayName: npcName,
-                sound: {
-                  soundId: {type: "default", value: ""},
-                  soundSource: {
-                    type: "self",
-                    entryId: "",
-                    location: {world: "", x: 0, y: 0, z: 0, yaw: 0, pitch: 0}
-                  },
-                  track: "MASTER",
-                  volume: 0,
-                  pitch: 0
-                },
-                data: [],
-                type: npcData.traits.type.toLowerCase() + "_definition"
-              }
-            ],
-            chapter: "migrated",
-            priority: 0,
-            version: "0.5.0-beta-79"
-          };
-          checkData(npcData);
-        } else {
-          alert("NPC type not supported: " + npcData.traits.type + "\nPlease report this in the typewriter discord server.");
-        }
-        //funcion for checking for data
-        function checkData(data) {
-          // Check if NPC has glowing trait and add glowing effect data to the data list
-          if (npcData && npcData.metadata && npcData.metadata.glowing === true) {
-            npcObject.entries.push({
-              id: glowingEffectId,
-              name: npcName.toLowerCase() + "_glowing_effect_data",
-              glowing: true,
-              priorityOverride: {enabled: false, value: 0},
-              type: "glowing_effect_data"
-            });
-            // Add glowing effect ID to the data list
-            npcObject.entries[0].data.push(glowingEffectId);
-          } if (npcData.traits.age.age < 0) {
-            npcObject.entries.push({
-              id: ageableId,
-              name: npcName.toLowerCase() + "_ageable_data",
-              baby: true,
-              priorityOverride: {enabled: false, value: 0},
-              type: "ageable_data",
-              });
-            // Add ageable effect ID to the data list
-            npcObject.entries[0].data.push(ageableId);
-          } else {}
-
-        }
-        // Create a Blob object containing the JSON data
-        const blob = new Blob([JSON.stringify(npcObject, null, 2)], {type: "application/json"});
-
-        // Create a download link
-        const downloadLink = document.createElement("a");
-        downloadLink.href = URL.createObjectURL(blob);
-        downloadLink.download = npcName + ".json";
-        downloadLink.click();
-        delete jsonData.npc[npcId];
-      });
-
-      const yamlData = jsyaml.dump(jsonData, { lineWidth: -1 });
-      console.log(yamlData); // Output YAML to console
-      //download the yaml file
-      const yamlBlob = new Blob([yamlData], {type: "application/yaml"});
-      const yamlDownloadLink = document.createElement("a");
-      yamlDownloadLink.href = URL.createObjectURL(yamlBlob);
-      yamlDownloadLink.download = "saves.yml";
-      yamlDownloadLink.click();
-
-      // After processing NPCs and updating pages
-      pagesData.forEach((page, index) => {
-          const pageBlob = new Blob([JSON.stringify(page.content, null, 2)], {type: "application/json"});
-          const pageDownloadLink = document.createElement("a");
-          pageDownloadLink.href = URL.createObjectURL(pageBlob);
-          pageDownloadLink.download = `modified_${page.name}`;
-          pageDownloadLink.click();
-      });
-    }
-  
-}
-
-
-</script>
-</body>
+    </script>
+  </body>
 </html>
