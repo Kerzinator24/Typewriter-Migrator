@@ -569,7 +569,7 @@
         npcInfoContainer.appendChild(checkbox);
 
         // Base64 decode the textureRaw property if it exists
-        if (npc.traits && npc.traits.skintrait && npc.traits.skintrait.textureRaw) {
+        if (npc.traits && npc.traits.skintrait && npc.traits.skintrait.textureRaw && npc.traits.type = "PLAYER") {
           const textureRaw = atob(npc.traits.skintrait.textureRaw);
           try {
             const textures = JSON.parse(textureRaw);
@@ -614,13 +614,14 @@
             // Append the image to the NPC info container
             npcInfoContainer.appendChild(npcImage);
             console.log(npc.name)
+            console.log(npc.traits.type)
           } catch (error) {
             console.error('Error parsing textureRaw JSON:'+ npc.name, error, npc.name);
           }
         }
 
-        //Check if the NPC is a "VILLAGER"
-        else if (npc.traits.type === "VILLAGER") {
+          //Check if the NPC is a "VILLAGER"
+          else if (npc.traits.type === "VILLAGER") {
                 let biome = "PLAINS";
                 let profession = "NONE";
                 try {
@@ -1362,7 +1363,8 @@
           pageDownloadLink.click();
       });
     }
-  }
+  
+}
 
 
 </script>
