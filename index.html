@@ -149,13 +149,15 @@
         margin-bottom: 20px;
       }
     </style>
-  </head>
-  <body>
-    <h1>Typewriter Auto-Migration Tool</h1>
-    <div id="uploadArea" class="scrollable">
-      <input type="file" id="fileInput" class="hidden" />
-      <button id="uploadButton" class="btn">Upload File</button>
-    </div>
+    </head>
+    <body>
+      <h1>Typewriter Auto-Migration Tool</h1>
+      <div id="uploadArea" class="scrollable">
+        <p id="uploadInstruction" class="text-xl font-bold mb-4">Upload zip of your Typewriter folder</p>
+        <p id="uploadInstruction" class="">All data is stored and processed on-device</p>
+        <input type="file" id="fileInput" class="hidden" />
+        <button id="uploadButton" class="btn">Upload File</button>
+      </div>
 
     <!-- Add a modal for selecting migration options -->
     <div id="migrationModal" class="modal">
@@ -222,27 +224,28 @@
           reader.readAsArrayBuffer(file);
         });
 
-      function unzipAndRezip(arrayBuffer) {
-        JSZip.loadAsync(arrayBuffer).then(function (zip) {
-          const newZip = new JSZip();
-          zip.forEach(function (relativePath, zipEntry) {
-            if (!zipEntry.dir) {
-              // Skip directories
-              newZip.file(zipEntry.name, zipEntry.async("arraybuffer"), {
-                binary: true,
-              });
-            }
-          });
+                  function unzipAndRezip(arrayBuffer) {
+                  JSZip.loadAsync(arrayBuffer).then(function (zip) {
+                    const newZip = new JSZip();
+                    zip.forEach(function (relativePath, zipEntry) {
+                      if (!zipEntry.dir) {
+                        newZip.file(zipEntry.name, zipEntry.async("arraybuffer"), {
+                          binary: true,
+                        });
+                      }
+                    });
 
-          // Call migrateFolder function after unzipping
-          migrateFolder(zip).then(function (files) {
-            confirmFiles(files).then(function (confirmedFiles) {
-              if (confirmedFiles.length > 0) {
-                document.getElementById("uploadArea").innerHTML =
-                  '<h2 class="text-xl font-bold mb-4">Choose which data you want to migrate</h2><ul id="fileList" class="list-disc pl-8"></ul>';
+                    migrateFolder(zip).then(function (files) {
+                      confirmFiles(files).then(function (confirmedFiles) {
+                        if (confirmedFiles.length > 0) {
+                          // Hide the upload instruction
+                          document.getElementById("uploadInstruction").style.display = "none";
 
-                const selectedModules = []; // Array to store selected modules
-                confirmedFiles.forEach(function (fileName, index) {
+                          document.getElementById("uploadArea").innerHTML =
+                            '<h2 class="text-xl font-bold mb-4">Choose which data you want to migrate</h2><ul id="fileList" class="list-disc pl-8"></ul>';
+
+                          const selectedModules = [];
+                          confirmedFiles.forEach(function (fileName, index) {
                   setTimeout(() => {
                     const listItem = document.createElement("li");
                     listItem.classList.add(
@@ -295,10 +298,10 @@
                   }, 800 * index);
                 });
 
-                const confirmButton = document.createElement("button");
-                confirmButton.textContent = "Continue";
-                confirmButton.classList.add("btn");
-                confirmButton.addEventListener("click", function () {
+                  const confirmButton = document.createElement("button");
+                  confirmButton.textContent = "Continue";
+                  confirmButton.classList.add("btn");
+                  confirmButton.addEventListener("click", function () {
                   if (!modalDisplayed && MigrationMode === "none") {
                     const checkedFiles = Array.from(
                       document.querySelectorAll('input[name="file"]:checked'),
@@ -316,12 +319,10 @@
                   }
                 });
 
-                document
-                  .getElementById("uploadArea")
-                  .appendChild(confirmButton);
-              } else {
-                console.log("No files selected for migration.");
-              }
+                        document.getElementById("uploadArea").appendChild(confirmButton);
+                        } else {
+                          console.log("No files selected for migration.");
+                        }
             });
           });
         });
@@ -1533,7 +1534,6 @@
           yamlDownloadLink.href = URL.createObjectURL(yamlBlob);
           yamlDownloadLink.download = "saves.yml";
           yamlDownloadLink.click();
-
           
         }
       }
