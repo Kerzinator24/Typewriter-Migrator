@@ -1216,6 +1216,7 @@
           );
           const selNPC = Array.from(selectedNPCs);
           selectedNPCs.forEach((npc) => {
+            console.log("forEach loop reached for npc.name")
             const npcId = npc.value;
             const npcData = jsonData.npc[npcId];
             const npcName = npcData.name;
@@ -1249,13 +1250,11 @@
             if (npcEntry) {
               const definitionId = npcEntry.npcEntryId;
               console.log("Definition ID set:", definitionId);
-              return definitionId;
             } else {
               console.log("NPC ID not found in npcIdEntryArray");
               console.log(npcIdEntryArray);
-              return null;
             }
-
+            console.log("reached part 1")
             // Check if NPC type is "PLAYER"
             if (npcData.traits.type === "PLAYER") {
               // Extract relevant traits
@@ -1341,7 +1340,7 @@
                     return "";
                 }
               }
-
+              console.log("reached part 1.1")
               // Create JSON object for NPC data
               npcObject = {
                 name: npcName.toLowerCase(),
@@ -1416,6 +1415,7 @@
               npcData.traits.type === "IRON_GOLEM" ||
               npcData.traits.type === "WITCH"
             ) {
+              console.log("processed", npcData.traits.type)
               // Create JSON object for NPC data
               npcObject = {
                 name: npcName.toLowerCase(),
@@ -1475,6 +1475,8 @@
                   "\nPlease report this in the typewriter discord server.",
               );
             }
+            console.log("forEach loop part 2 reached for npc.name")
+
             //funcion for checking for data
             function checkData(data) {
               // Check if NPC has glowing trait and add glowing effect data to the data list
@@ -1493,7 +1495,10 @@
                 // Add glowing effect ID to the data list
                 npcObject.entries[0].data.push(glowingEffectId);
               }
-              if (npcData.traits.age.age < 0) {
+              if (npcData &&
+                  npcData.traits &&
+                  npcData.traits.age &&
+                  npcData.traits.age.age < 0) {
                 npcObject.entries.push({
                   id: ageableId,
                   name: npcName.toLowerCase() + "_ageable_data",
@@ -1506,6 +1511,7 @@
               } else {
               }
             }
+            console.log("forEach loop part 3 reached for npc.name")
             // Create a Blob object containing the JSON data
             const blob = new Blob([JSON.stringify(npcObject, null, 2)], {
               type: "application/json",
@@ -1528,16 +1534,7 @@
           yamlDownloadLink.download = "saves.yml";
           yamlDownloadLink.click();
 
-          // After processing NPCs and updating pages
-          pagesData.forEach((page, index) => {
-            const pageBlob = new Blob([JSON.stringify(page.content, null, 2)], {
-              type: "application/json",
-            });
-            const pageDownloadLink = document.createElement("a");
-            pageDownloadLink.href = URL.createObjectURL(pageBlob);
-            pageDownloadLink.download = `modified_${page.name}`;
-            pageDownloadLink.click();
-          });
+          
         }
       }
     </script>
