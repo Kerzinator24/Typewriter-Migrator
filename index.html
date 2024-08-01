@@ -1509,9 +1509,28 @@
                 });
                 // Add ageable effect ID to the data list
                 npcObject.entries[0].data.push(ageableId);
+              }
+              if (npcData && npcData.metadata && npcData.metadata.minecraft-ai === true) {
+                npcObject.entries.push({
+                  id: playerCloseID,
+                  name: npcName.toLowerCase() + "_player_close_by_activity",
+                  range: 5,
+                  maxIdleDuration: 6000,
+                  closeByActivity: lookCloseID,
+                  idleActivity: "",
+                  type: "player_close_by_activity",
+                });
+                npcObject.entries.push({
+                  id: lookCloseID,
+                  name: npcName.toLowerCase() + "_look_close_activity",
+                  type: "look_close_activity",
+                });
+                // Add minecraft-ai effect ID to the data list
+                npcObject.entries[1].activity = playerCloseID;
               } else {
               }
             }
+
             console.log("forEach loop part 3 reached for npc.name")
             // Create a Blob object containing the JSON data
             const blob = new Blob([JSON.stringify(npcObject, null, 2)], {
