@@ -1510,7 +1510,7 @@
                 // Add ageable effect ID to the data list
                 npcObject.entries[0].data.push(ageableId);
               }
-              if (npcData && npcData.metadata && npcData.metadata.minecraft-ai === true) {
+              if (npcData && npcData.metadata && npcData.metadata['minecraft-ai']) {
                 npcObject.entries.push({
                   id: playerCloseID,
                   name: npcName.toLowerCase() + "_player_close_by_activity",
