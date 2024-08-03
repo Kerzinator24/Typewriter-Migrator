@@ -831,109 +831,480 @@
 
               // Append the image to the NPC info container
               npcInfoContainer.appendChild(npcImage);
-            } else if (
-              npc.traits.type === "ZOMBIE" ||
-              npc.traits.type === "HUSK" ||
-              npc.traits.type === "PIGLIN" ||
-              npc.traits.type === "HOGLIN" ||
-              npc.traits.type === "PIGLIN_BRUTE" ||
-              npc.traits.type === "WARDEN" ||
-              npc.traits.type === "ENDERMAN" ||
-              npc.traits.type === "SKELETON" ||
-              npc.traits.type === "COW" ||
-              npc.traits.type === "IRON_GOLEM" ||
-              npc.traits.type === "WITCH"
-            ) {
-              try {
-                if (npc.traits.type === "ZOMBIE") {
-                  headUrl = "images/zombie/zombie_head.png";
-                  fullBodyUrl = "images/zombie/zombie_full_body.png";
+            } else if (npc.traits.type === "ZOMBIE") {
+                  const headUrl = "images/zombie/zombie_head.png";
+                  const fullBodyUrl = "images/zombie/zombie_full_body.png";
+              // Create an image element for the NPC's head
+              const npcImage = document.createElement("img");
+              npcImage.src = headUrl;
+              npcImage.alt = `NPC ${npcId} Head`;
+
+              // Apply CSS styling to adjust the size of the image and transition effect
+              npcImage.classList.add("npc-image");
+              npcImage.style.width = "50px"; // Set initial width
+              npcImage.style.height = "auto"; // Maintain aspect ratio
+              // Add transition effect with delay for translateY
+              npcImage.style.transition =
+                "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
+
+              // Apply CSS styling to adjust the size and position of the image and transition effect
+              npcImage.classList.add("npc-image");
+              npcImage.style.width = "50px"; // Set initial width
+              npcImage.style.height = "auto"; // Maintain aspect ratio
+              // Add transition effect with delay for translateY
+              npcImage.style.transition =
+                "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
+
+              // Add event listeners for hover behavior on the entire NPC container
+              npcContainer.addEventListener("mouseenter", function () {
+                // Delay the switch to full body and increase size
+                setTimeout(function () {
+                  npcImage.src = fullBodyUrl; // Change the image source to full-body version
+                  npcImage.style.width = "100px"; // Decrease width
+                });
+              });
+
+              npcContainer.addEventListener("mouseleave", function () {
+                // Reset transform and size
+                npcImage.style.transform = "translateY(0)";
+                npcImage.src = headUrl; // Change back to head version
+                npcImage.style.width = "50px"; // Reset width
+              });
+
+              // Append the image to the NPC info container
+              npcInfoContainer.appendChild(npcImage);
                 }
-                if (npc.traits.type === "HUSK") {
+
+                else if (npc.traits.type === "HUSK") {
                   headUrl = "images/husk/husk_head.png";
                   fullBodyUrl = "images/husk/husk_full_body.png";
+                  // Create an image element for the NPC's head
+                  const npcImage = document.createElement("img");
+                  npcImage.src = headUrl;
+                  npcImage.alt = `NPC ${npcId} Head`;
+
+                  // Apply CSS styling to adjust the size of the image and transition effect
+                  npcImage.classList.add("npc-image");
+                  npcImage.style.width = "50px"; // Set initial width
+                  npcImage.style.height = "auto"; // Maintain aspect ratio
+                  // Add transition effect with delay for translateY
+                  npcImage.style.transition =
+                    "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
+
+                  // Apply CSS styling to adjust the size and position of the image and transition effect
+                  npcImage.classList.add("npc-image");
+                  npcImage.style.width = "50px"; // Set initial width
+                  npcImage.style.height = "auto"; // Maintain aspect ratio
+                  // Add transition effect with delay for translateY
+                  npcImage.style.transition =
+                    "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
+
+                  // Add event listeners for hover behavior on the entire NPC container
+                  npcContainer.addEventListener("mouseenter", function () {
+                    // Delay the switch to full body and increase size
+                    setTimeout(function () {
+                      npcImage.src = fullBodyUrl; // Change the image source to full-body version
+                      npcImage.style.width = "100px"; // Decrease width
+                    });
+                  });
+
+                  npcContainer.addEventListener("mouseleave", function () {
+                    // Reset transform and size
+                    npcImage.style.transform = "translateY(0)";
+                    npcImage.src = headUrl; // Change back to head version
+                    npcImage.style.width = "50px"; // Reset width
+                  });
+
+                  // Append the image to the NPC info container
+                  npcInfoContainer.appendChild(npcImage);
                 }
-                if (npc.traits.type === "PIGLIN") {
+                else if (npc.traits.type === "PIGLIN") {
                   headUrl = "images/piglin/piglin_head.png";
                   fullBodyUrl = "images/piglin/piglin_full_body.png";
+                  // Create an image element for the NPC's head
+                  const npcImage = document.createElement("img");
+                  npcImage.src = headUrl;
+                  npcImage.alt = `NPC ${npcId} Head`;
+
+                  // Apply CSS styling to adjust the size of the image and transition effect
+                  npcImage.classList.add("npc-image");
+                  npcImage.style.width = "50px"; // Set initial width
+                  npcImage.style.height = "auto"; // Maintain aspect ratio
+                  // Add transition effect with delay for translateY
+                  npcImage.style.transition =
+                    "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
+
+                  // Apply CSS styling to adjust the size and position of the image and transition effect
+                  npcImage.classList.add("npc-image");
+                  npcImage.style.width = "50px"; // Set initial width
+                  npcImage.style.height = "auto"; // Maintain aspect ratio
+                  // Add transition effect with delay for translateY
+                  npcImage.style.transition =
+                    "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
+
+                  // Add event listeners for hover behavior on the entire NPC container
+                  npcContainer.addEventListener("mouseenter", function () {
+                    // Delay the switch to full body and increase size
+                    setTimeout(function () {
+                      npcImage.src = fullBodyUrl; // Change the image source to full-body version
+                      npcImage.style.width = "100px"; // Decrease width
+                    });
+                  });
+
+                  npcContainer.addEventListener("mouseleave", function () {
+                    // Reset transform and size
+                    npcImage.style.transform = "translateY(0)";
+                    npcImage.src = headUrl; // Change back to head version
+                    npcImage.style.width = "50px"; // Reset width
+                  });
+
+                  // Append the image to the NPC info container
+                  npcInfoContainer.appendChild(npcImage);
                 }
-                if (npc.traits.type === "HOGLIN") {
+                else if (npc.traits.type === "HOGLIN") {
                   headUrl = "images/hoglin/hoglin_head.png";
                   fullBodyUrl = "images/hoglin/hoglin_full_body.png";
+                  // Create an image element for the NPC's head
+                  const npcImage = document.createElement("img");
+                  npcImage.src = headUrl;
+                  npcImage.alt = `NPC ${npcId} Head`;
+
+                  // Apply CSS styling to adjust the size of the image and transition effect
+                  npcImage.classList.add("npc-image");
+                  npcImage.style.width = "50px"; // Set initial width
+                  npcImage.style.height = "auto"; // Maintain aspect ratio
+                  // Add transition effect with delay for translateY
+                  npcImage.style.transition =
+                    "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
+
+                  // Apply CSS styling to adjust the size and position of the image and transition effect
+                  npcImage.classList.add("npc-image");
+                  npcImage.style.width = "50px"; // Set initial width
+                  npcImage.style.height = "auto"; // Maintain aspect ratio
+                  // Add transition effect with delay for translateY
+                  npcImage.style.transition =
+                    "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
+
+                  // Add event listeners for hover behavior on the entire NPC container
+                  npcContainer.addEventListener("mouseenter", function () {
+                    // Delay the switch to full body and increase size
+                    setTimeout(function () {
+                      npcImage.src = fullBodyUrl; // Change the image source to full-body version
+                      npcImage.style.width = "100px"; // Decrease width
+                    });
+                  });
+
+                  npcContainer.addEventListener("mouseleave", function () {
+                    // Reset transform and size
+                    npcImage.style.transform = "translateY(0)";
+                    npcImage.src = headUrl; // Change back to head version
+                    npcImage.style.width = "50px"; // Reset width
+                  });
+
+                  // Append the image to the NPC info container
+                  npcInfoContainer.appendChild(npcImage);
                 }
-                if (npc.traits.type === "PIGLIN_BRUTE") {
+                else if (npc.traits.type === "PIGLIN_BRUTE") {
                   headUrl = "images/piglin_brute/piglin_brute_head.png";
-                  fullBodyUrl =
-                    "images/piglin_brute/piglin_brute_full_body.png";
+                  fullBodyUrl = "images/piglin_brute/piglin_brute_full_body.png";
+                  // Create an image element for the NPC's head
+                  const npcImage = document.createElement("img");
+                  npcImage.src = headUrl;
+                  npcImage.alt = `NPC ${npcId} Head`;
+
+                  // Apply CSS styling to adjust the size of the image and transition effect
+                  npcImage.classList.add("npc-image");
+                  npcImage.style.width = "50px"; // Set initial width
+                  npcImage.style.height = "auto"; // Maintain aspect ratio
+                  // Add transition effect with delay for translateY
+                  npcImage.style.transition =
+                    "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
+
+                  // Apply CSS styling to adjust the size and position of the image and transition effect
+                  npcImage.classList.add("npc-image");
+                  npcImage.style.width = "50px"; // Set initial width
+                  npcImage.style.height = "auto"; // Maintain aspect ratio
+                  // Add transition effect with delay for translateY
+                  npcImage.style.transition =
+                    "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
+
+                  // Add event listeners for hover behavior on the entire NPC container
+                  npcContainer.addEventListener("mouseenter", function () {
+                    // Delay the switch to full body and increase size
+                    setTimeout(function () {
+                      npcImage.src = fullBodyUrl; // Change the image source to full-body version
+                      npcImage.style.width = "100px"; // Decrease width
+                    });
+                  });
+
+                  npcContainer.addEventListener("mouseleave", function () {
+                    // Reset transform and size
+                    npcImage.style.transform = "translateY(0)";
+                    npcImage.src = headUrl; // Change back to head version
+                    npcImage.style.width = "50px"; // Reset width
+                  });
+
+                  // Append the image to the NPC info container
+                  npcInfoContainer.appendChild(npcImage);
                 }
-                if (npc.traits.type === "WARDEN") {
+                else if (npc.traits.type === "WARDEN") {
                   headUrl = "images/warden/warden_head.png";
                   fullBodyUrl = "images/warden/warden_full_body.png";
+                  // Create an image element for the NPC's head
+                  const npcImage = document.createElement("img");
+                  npcImage.src = headUrl;
+                  npcImage.alt = `NPC ${npcId} Head`;
+
+                  // Apply CSS styling to adjust the size of the image and transition effect
+                  npcImage.classList.add("npc-image");
+                  npcImage.style.width = "50px"; // Set initial width
+                  npcImage.style.height = "auto"; // Maintain aspect ratio
+                  // Add transition effect with delay for translateY
+                  npcImage.style.transition =
+                    "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
+
+                  // Apply CSS styling to adjust the size and position of the image and transition effect
+                  npcImage.classList.add("npc-image");
+                  npcImage.style.width = "50px"; // Set initial width
+                  npcImage.style.height = "auto"; // Maintain aspect ratio
+                  // Add transition effect with delay for translateY
+                  npcImage.style.transition =
+                    "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
+
+                  // Add event listeners for hover behavior on the entire NPC container
+                  npcContainer.addEventListener("mouseenter", function () {
+                    // Delay the switch to full body and increase size
+                    setTimeout(function () {
+                      npcImage.src = fullBodyUrl; // Change the image source to full-body version
+                      npcImage.style.width = "100px"; // Decrease width
+                    });
+                  });
+
+                  npcContainer.addEventListener("mouseleave", function () {
+                    // Reset transform and size
+                    npcImage.style.transform = "translateY(0)";
+                    npcImage.src = headUrl; // Change back to head version
+                    npcImage.style.width = "50px"; // Reset width
+                  });
+
+                  // Append the image to the NPC info container
+                  npcInfoContainer.appendChild(npcImage);
                 }
-                if (npc.traits.type === "ENDERMAN") {
+                else if (npc.traits.type === "ENDERMAN") {
                   headUrl = "images/enderman/enderman_head.png";
                   fullBodyUrl = "images/enderman/enderman_full_body.png";
+                  // Create an image element for the NPC's head
+                  const npcImage = document.createElement("img");
+                  npcImage.src = headUrl;
+                  npcImage.alt = `NPC ${npcId} Head`;
+
+                  // Apply CSS styling to adjust the size of the image and transition effect
+                  npcImage.classList.add("npc-image");
+                  npcImage.style.width = "50px"; // Set initial width
+                  npcImage.style.height = "auto"; // Maintain aspect ratio
+                  // Add transition effect with delay for translateY
+                  npcImage.style.transition =
+                    "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
+
+                  // Apply CSS styling to adjust the size and position of the image and transition effect
+                  npcImage.classList.add("npc-image");
+                  npcImage.style.width = "50px"; // Set initial width
+                  npcImage.style.height = "auto"; // Maintain aspect ratio
+                  // Add transition effect with delay for translateY
+                  npcImage.style.transition =
+                    "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
+
+                  // Add event listeners for hover behavior on the entire NPC container
+                  npcContainer.addEventListener("mouseenter", function () {
+                    // Delay the switch to full body and increase size
+                    setTimeout(function () {
+                      npcImage.src = fullBodyUrl; // Change the image source to full-body version
+                      npcImage.style.width = "100px"; // Decrease width
+                    });
+                  });
+
+                  npcContainer.addEventListener("mouseleave", function () {
+                    // Reset transform and size
+                    npcImage.style.transform = "translateY(0)";
+                    npcImage.src = headUrl; // Change back to head version
+                    npcImage.style.width = "50px"; // Reset width
+                  });
+
+                  // Append the image to the NPC info container
+                  npcInfoContainer.appendChild(npcImage);
                 }
-                if (npc.traits.type === "SKELETON") {
+                else if (npc.traits.type === "SKELETON") {
                   headUrl = "images/skeleton/skeleton_head.png";
                   fullBodyUrl = "images/skeleton/skeleton_full_body.png";
+                  // Create an image element for the NPC's head
+                  const npcImage = document.createElement("img");
+                  npcImage.src = headUrl;
+                  npcImage.alt = `NPC ${npcId} Head`;
+
+                  // Apply CSS styling to adjust the size of the image and transition effect
+                  npcImage.classList.add("npc-image");
+                  npcImage.style.width = "50px"; // Set initial width
+                  npcImage.style.height = "auto"; // Maintain aspect ratio
+                  // Add transition effect with delay for translateY
+                  npcImage.style.transition =
+                    "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
+
+                  // Apply CSS styling to adjust the size and position of the image and transition effect
+                  npcImage.classList.add("npc-image");
+                  npcImage.style.width = "50px"; // Set initial width
+                  npcImage.style.height = "auto"; // Maintain aspect ratio
+                  // Add transition effect with delay for translateY
+                  npcImage.style.transition =
+                    "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
+
+                  // Add event listeners for hover behavior on the entire NPC container
+                  npcContainer.addEventListener("mouseenter", function () {
+                    // Delay the switch to full body and increase size
+                    setTimeout(function () {
+                      npcImage.src = fullBodyUrl; // Change the image source to full-body version
+                      npcImage.style.width = "100px"; // Decrease width
+                    });
+                  });
+
+                  npcContainer.addEventListener("mouseleave", function () {
+                    // Reset transform and size
+                    npcImage.style.transform = "translateY(0)";
+                    npcImage.src = headUrl; // Change back to head version
+                    npcImage.style.width = "50px"; // Reset width
+                  });
+
+                  // Append the image to the NPC info container
+                  npcInfoContainer.appendChild(npcImage);
                 }
-                if (npc.traits.type === "COW") {
+                else if (npc.traits.type === "COW") {
                   headUrl = "images/cow/cow_head.png";
                   fullBodyUrl = "images/cow/cow_full_body.png";
+                  // Create an image element for the NPC's head
+                  const npcImage = document.createElement("img");
+                  npcImage.src = headUrl;
+                  npcImage.alt = `NPC ${npcId} Head`;
+
+                  // Apply CSS styling to adjust the size of the image and transition effect
+                  npcImage.classList.add("npc-image");
+                  npcImage.style.width = "50px"; // Set initial width
+                  npcImage.style.height = "auto"; // Maintain aspect ratio
+                  // Add transition effect with delay for translateY
+                  npcImage.style.transition =
+                    "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
+
+                  // Apply CSS styling to adjust the size and position of the image and transition effect
+                  npcImage.classList.add("npc-image");
+                  npcImage.style.width = "50px"; // Set initial width
+                  npcImage.style.height = "auto"; // Maintain aspect ratio
+                  // Add transition effect with delay for translateY
+                  npcImage.style.transition =
+                    "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
+
+                  // Add event listeners for hover behavior on the entire NPC container
+                  npcContainer.addEventListener("mouseenter", function () {
+                    // Delay the switch to full body and increase size
+                    setTimeout(function () {
+                      npcImage.src = fullBodyUrl; // Change the image source to full-body version
+                      npcImage.style.width = "100px"; // Decrease width
+                    });
+                  });
+
+                  npcContainer.addEventListener("mouseleave", function () {
+                    // Reset transform and size
+                    npcImage.style.transform = "translateY(0)";
+                    npcImage.src = headUrl; // Change back to head version
+                    npcImage.style.width = "50px"; // Reset width
+                  });
+
+                  // Append the image to the NPC info container
+                  npcInfoContainer.appendChild(npcImage);
                 }
-                if (npc.traits.type === "IRON_GOLEM") {
+                else if (npc.traits.type === "IRON_GOLEM") {
                   headUrl = "images/iron_golem/iron_golem_head.png";
                   fullBodyUrl = "images/iron_golem/iron_golem_full_body.png";
+                  // Create an image element for the NPC's head
+                  const npcImage = document.createElement("img");
+                  npcImage.src = headUrl;
+                  npcImage.alt = `NPC ${npcId} Head`;
+
+                  // Apply CSS styling to adjust the size of the image and transition effect
+                  npcImage.classList.add("npc-image");
+                  npcImage.style.width = "50px"; // Set initial width
+                  npcImage.style.height = "auto"; // Maintain aspect ratio
+                  // Add transition effect with delay for translateY
+                  npcImage.style.transition =
+                    "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
+
+                  // Apply CSS styling to adjust the size and position of the image and transition effect
+                  npcImage.classList.add("npc-image");
+                  npcImage.style.width = "50px"; // Set initial width
+                  npcImage.style.height = "auto"; // Maintain aspect ratio
+                  // Add transition effect with delay for translateY
+                  npcImage.style.transition =
+                    "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
+
+                  // Add event listeners for hover behavior on the entire NPC container
+                  npcContainer.addEventListener("mouseenter", function () {
+                    // Delay the switch to full body and increase size
+                    setTimeout(function () {
+                      npcImage.src = fullBodyUrl; // Change the image source to full-body version
+                      npcImage.style.width = "100px"; // Decrease width
+                    });
+                  });
+
+                  npcContainer.addEventListener("mouseleave", function () {
+                    // Reset transform and size
+                    npcImage.style.transform = "translateY(0)";
+                    npcImage.src = headUrl; // Change back to head version
+                    npcImage.style.width = "50px"; // Reset width
+                  });
+
+                  // Append the image to the NPC info container
+                  npcInfoContainer.appendChild(npcImage);
                 }
-                if (npc.traits.type === "WITCH") {
+                else if (npc.traits.type === "WITCH") {
                   headUrl = "images/witch/witch_head.png";
                   fullBodyUrl = "images/witch/witch_full_body.png";
-                }
+                  // Create an image element for the NPC's head
+                  const npcImage = document.createElement("img");
+                  npcImage.src = headUrl;
+                  npcImage.alt = `NPC ${npcId} Head`;
 
-                // Create an image element for the NPC's head
-                const npcImage = document.createElement("img");
-                npcImage.src = headUrl;
-                npcImage.alt = `NPC ${npcId} Head`;
+                  // Apply CSS styling to adjust the size of the image and transition effect
+                  npcImage.classList.add("npc-image");
+                  npcImage.style.width = "50px"; // Set initial width
+                  npcImage.style.height = "auto"; // Maintain aspect ratio
+                  // Add transition effect with delay for translateY
+                  npcImage.style.transition =
+                    "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
 
-                // Apply CSS styling to adjust the size of the image and transition effect
-                npcImage.classList.add("npc-image");
-                npcImage.style.width = "50px"; // Set initial width
-                npcImage.style.height = "auto"; // Maintain aspect ratio
-                // Add transition effect with delay for translateY
-                npcImage.style.transition =
-                  "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
+                  // Apply CSS styling to adjust the size and position of the image and transition effect
+                  npcImage.classList.add("npc-image");
+                  npcImage.style.width = "50px"; // Set initial width
+                  npcImage.style.height = "auto"; // Maintain aspect ratio
+                  // Add transition effect with delay for translateY
+                  npcImage.style.transition =
+                    "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
 
-                // Apply CSS styling to adjust the size and position of the image and transition effect
-                npcImage.classList.add("npc-image");
-                npcImage.style.width = "50px"; // Set initial width
-                npcImage.style.height = "auto"; // Maintain aspect ratio
-                // Add transition effect with delay for translateY
-                npcImage.style.transition =
-                  "transform 0.5s ease-in-out 0.2s, width 0.3s ease-in-out";
-
-                // Add event listeners for hover behavior on the entire NPC container
-                npcContainer.addEventListener("mouseenter", function () {
-                  // Delay the switch to full body and increase size
-                  setTimeout(function () {
-                    npcImage.src = fullBodyUrl; // Change the image source to full-body version
-                    npcImage.style.width = "100px"; // Decrease width
+                  // Add event listeners for hover behavior on the entire NPC container
+                  npcContainer.addEventListener("mouseenter", function () {
+                    // Delay the switch to full body and increase size
+                    setTimeout(function () {
+                      npcImage.src = fullBodyUrl; // Change the image source to full-body version
+                      npcImage.style.width = "100px"; // Decrease width
+                    });
                   });
-                });
 
-                npcContainer.addEventListener("mouseleave", function () {
-                  // Reset transform and size
-                  npcImage.style.transform = "translateY(0)";
-                  npcImage.src = headUrl; // Change back to head version
-                  npcImage.style.width = "50px"; // Reset width
-                });
+                  npcContainer.addEventListener("mouseleave", function () {
+                    // Reset transform and size
+                    npcImage.style.transform = "translateY(0)";
+                    npcImage.src = headUrl; // Change back to head version
+                    npcImage.style.width = "50px"; // Reset width
+                  });
 
-                // Append the image to the NPC info container
-                npcInfoContainer.appendChild(npcImage);
-              } catch (error) {
-                console.error("Error parsing textureRaw JSON:", error);
-              }
-            } else {
+                  // Append the image to the NPC info container
+                  npcInfoContainer.appendChild(npcImage);
+                } else {
               console.log(npc);
             }
 
@@ -1029,19 +1400,19 @@
             const npcName = npcData.name;
 
             // Generate hashed ID for definition and instance with "i" and "d" prefixes
-            let definitionId = generateHash({ id: npcId, name: npcName }, "d");
-            let instanceId = generateHash({ id: npcId, name: npcName }, "i");
+            let definitionId = generateHash({id: npcId, name: npcName}, "d");
+            let instanceId = generateHash({id: npcId, name: npcName}, "i");
             let glowingEffectId = generateHash(
-              { id: npcId, name: npcName },
+              {id: npcId, name: npcName},
               "glo-d",
             );
-            let ageableId = generateHash({ id: npcId, name: npcName }, "age-d");
+            let ageableId = generateHash({id: npcId, name: npcName}, "age-d");
             let playerCloseID = generateHash(
-              { id: npcId, name: npcName },
+              {id: npcId, name: npcName},
               "pc-a",
             );
             let lookCloseID = generateHash(
-              { id: npcId, name: npcName },
+              {id: npcId, name: npcName},
               "lc-a",
             );
 
@@ -1084,7 +1455,7 @@
                     name: npcName + "_definition",
                     displayName: npcName,
                     sound: {
-                      soundId: { type: "default", value: "" },
+                      soundId: {type: "default", value: ""},
                       soundSource: {
                         type: "self",
                         entryId: "",
@@ -1155,6 +1526,7 @@
                     return "";
                 }
               }
+
               console.log("reached part 1.1");
               // Create JSON object for NPC data
               npcObject = {
@@ -1182,7 +1554,7 @@
                     name: npcName.toLowerCase() + "_definition",
                     displayName: npcName,
                     sound: {
-                      soundId: { type: "default", value: "" },
+                      soundId: {type: "default", value: ""},
                       soundSource: {
                         type: "self",
                         entryId: "",
@@ -1199,16 +1571,16 @@
                       volume: 0,
                       pitch: 0,
                     },
-                    data: [generateHash({ id: npcId, name: npcName }, "B")],
+                    data: [generateHash({id: npcId, name: npcName}, "B")],
                     type: "villager_definition",
                   },
                   {
-                    id: generateHash({ id: npcId, name: npcName }, "B"),
+                    id: generateHash({id: npcId, name: npcName}, "B"),
                     name: npcName.toLowerCase() + "_data",
                     villagerType: villagerType.toUpperCase(),
                     profession: profession.toUpperCase(),
                     level: level,
-                    priorityOverride: { enabled: false, value: 0 },
+                    priorityOverride: {enabled: false, value: 0},
                     type: "villager_data",
                   },
                 ],
@@ -1257,7 +1629,7 @@
                     name: npcName.toLowerCase() + "_definition",
                     displayName: npcName,
                     sound: {
-                      soundId: { type: "default", value: "" },
+                      soundId: {type: "default", value: ""},
                       soundSource: {
                         type: "self",
                         entryId: "",
@@ -1286,8 +1658,8 @@
             } else {
               alert(
                 "NPC type not supported: " +
-                  npcData.traits.type +
-                  "\nPlease report this in the typewriter discord server.",
+                npcData.traits.type +
+                "\nPlease report this in the typewriter discord server.",
               );
             }
             console.log("forEach loop part 2 reached for npc.name");
@@ -1304,7 +1676,7 @@
                   id: glowingEffectId,
                   name: npcName.toLowerCase() + "_glowing_effect_data",
                   glowing: true,
-                  priorityOverride: { enabled: false, value: 0 },
+                  priorityOverride: {enabled: false, value: 0},
                   type: "glowing_effect_data",
                 });
                 // Add glowing effect ID to the data list
@@ -1320,7 +1692,7 @@
                   id: ageableId,
                   name: npcName.toLowerCase() + "_ageable_data",
                   baby: true,
-                  priorityOverride: { enabled: false, value: 0 },
+                  priorityOverride: {enabled: false, value: 0},
                   type: "ageable_data",
                 });
                 // Add ageable effect ID to the data list
@@ -1365,10 +1737,10 @@
             delete jsonData.npc[npcId];
           });
 
-          const yamlData = jsyaml.dump(jsonData, { lineWidth: -1 });
+          const yamlData = jsyaml.dump(jsonData, {lineWidth: -1});
           console.log(yamlData); // Output YAML to console
           //download the yaml file
-          const yamlBlob = new Blob([yamlData], { type: "application/yaml" });
+          const yamlBlob = new Blob([yamlData], {type: "application/yaml"});
           const yamlDownloadLink = document.createElement("a");
           yamlDownloadLink.href = URL.createObjectURL(yamlBlob);
           yamlDownloadLink.download = "saves.yml";
