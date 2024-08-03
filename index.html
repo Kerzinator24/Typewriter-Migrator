@@ -1230,6 +1230,8 @@
               "glo-d",
             );
             let ageableId = generateHash({ id: npcId, name: npcName }, "age-d");
+            let playerCloseID = generateHash({ id: npcId, name: npcName }, "pc-a");
+            let lookCloseID = generateHash({ id: npcId, name: npcName }, "lc-a");
 
             // Extract NPC traits with default values if missing
             const traits = npcData.traits || {};
@@ -1526,7 +1528,7 @@
                   type: "look_close_activity",
                 });
                 // Add minecraft-ai effect ID to the data list
-                npcObject.entries[1].activity = playerCloseID;
+                npcObject.entries[0].activity = playerCloseID;
               } else {
               }
             }
