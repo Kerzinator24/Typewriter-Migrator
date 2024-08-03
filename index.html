@@ -149,15 +149,19 @@
         margin-bottom: 20px;
       }
     </style>
-    </head>
-    <body>
-      <h1>Typewriter Auto-Migration Tool</h1>
-      <div id="uploadArea" class="scrollable">
-        <p id="uploadInstruction" class="text-xl font-bold mb-4">Upload zip of your Typewriter folder</p>
-        <p id="uploadInstruction" class="">All data is stored and processed on-device</p>
-        <input type="file" id="fileInput" class="hidden" />
-        <button id="uploadButton" class="btn">Upload File</button>
-      </div>
+  </head>
+  <body>
+    <h1>Typewriter Auto-Migration Tool</h1>
+    <div id="uploadArea" class="scrollable">
+      <p id="uploadInstruction" class="text-xl font-bold mb-4">
+        Upload zip of your Typewriter folder
+      </p>
+      <p id="uploadInstruction" class="">
+        All data is stored and processed on-device
+      </p>
+      <input type="file" id="fileInput" class="hidden" />
+      <button id="uploadButton" class="btn">Upload File</button>
+    </div>
 
     <!-- Add a modal for selecting migration options -->
     <div id="migrationModal" class="modal">
@@ -224,28 +228,29 @@
           reader.readAsArrayBuffer(file);
         });
 
-                  function unzipAndRezip(arrayBuffer) {
-                  JSZip.loadAsync(arrayBuffer).then(function (zip) {
-                    const newZip = new JSZip();
-                    zip.forEach(function (relativePath, zipEntry) {
-                      if (!zipEntry.dir) {
-                        newZip.file(zipEntry.name, zipEntry.async("arraybuffer"), {
-                          binary: true,
-                        });
-                      }
-                    });
+      function unzipAndRezip(arrayBuffer) {
+        JSZip.loadAsync(arrayBuffer).then(function (zip) {
+          const newZip = new JSZip();
+          zip.forEach(function (relativePath, zipEntry) {
+            if (!zipEntry.dir) {
+              newZip.file(zipEntry.name, zipEntry.async("arraybuffer"), {
+                binary: true,
+              });
+            }
+          });
 
-                    migrateFolder(zip).then(function (files) {
-                      confirmFiles(files).then(function (confirmedFiles) {
-                        if (confirmedFiles.length > 0) {
-                          // Hide the upload instruction
-                          document.getElementById("uploadInstruction").style.display = "none";
+          migrateFolder(zip).then(function (files) {
+            confirmFiles(files).then(function (confirmedFiles) {
+              if (confirmedFiles.length > 0) {
+                // Hide the upload instruction
+                document.getElementById("uploadInstruction").style.display =
+                  "none";
 
-                          document.getElementById("uploadArea").innerHTML =
-                            '<h2 class="text-xl font-bold mb-4">Choose which data you want to migrate</h2><ul id="fileList" class="list-disc pl-8"></ul>';
+                document.getElementById("uploadArea").innerHTML =
+                  '<h2 class="text-xl font-bold mb-4">Choose which data you want to migrate</h2><ul id="fileList" class="list-disc pl-8"></ul>';
 
-                          const selectedModules = [];
-                          confirmedFiles.forEach(function (fileName, index) {
+                const selectedModules = [];
+                confirmedFiles.forEach(function (fileName, index) {
                   setTimeout(() => {
                     const listItem = document.createElement("li");
                     listItem.classList.add(
@@ -298,10 +303,10 @@
                   }, 800 * index);
                 });
 
-                  const confirmButton = document.createElement("button");
-                  confirmButton.textContent = "Continue";
-                  confirmButton.classList.add("btn");
-                  confirmButton.addEventListener("click", function () {
+                const confirmButton = document.createElement("button");
+                confirmButton.textContent = "Continue";
+                confirmButton.classList.add("btn");
+                confirmButton.addEventListener("click", function () {
                   if (!modalDisplayed && MigrationMode === "none") {
                     const checkedFiles = Array.from(
                       document.querySelectorAll('input[name="file"]:checked'),
@@ -319,10 +324,12 @@
                   }
                 });
 
-                        document.getElementById("uploadArea").appendChild(confirmButton);
-                        } else {
-                          console.log("No files selected for migration.");
-                        }
+                document
+                  .getElementById("uploadArea")
+                  .appendChild(confirmButton);
+              } else {
+                console.log("No files selected for migration.");
+              }
             });
           });
         });
@@ -1217,7 +1224,7 @@
           );
           const selNPC = Array.from(selectedNPCs);
           selectedNPCs.forEach((npc) => {
-            console.log("forEach loop reached for npc.name")
+            console.log("forEach loop reached for npc.name");
             const npcId = npc.value;
             const npcData = jsonData.npc[npcId];
             const npcName = npcData.name;
@@ -1230,8 +1237,14 @@
               "glo-d",
             );
             let ageableId = generateHash({ id: npcId, name: npcName }, "age-d");
-            let playerCloseID = generateHash({ id: npcId, name: npcName }, "pc-a");
-            let lookCloseID = generateHash({ id: npcId, name: npcName }, "lc-a");
+            let playerCloseID = generateHash(
+              { id: npcId, name: npcName },
+              "pc-a",
+            );
+            let lookCloseID = generateHash(
+              { id: npcId, name: npcName },
+              "lc-a",
+            );
 
             // Extract NPC traits with default values if missing
             const traits = npcData.traits || {};
@@ -1257,7 +1270,7 @@
               console.log("NPC ID not found in npcIdEntryArray");
               console.log(npcIdEntryArray);
             }
-            console.log("reached part 1")
+            console.log("reached part 1");
             // Check if NPC type is "PLAYER"
             if (npcData.traits.type === "PLAYER") {
               // Extract relevant traits
@@ -1343,7 +1356,7 @@
                     return "";
                 }
               }
-              console.log("reached part 1.1")
+              console.log("reached part 1.1");
               // Create JSON object for NPC data
               npcObject = {
                 name: npcName.toLowerCase(),
@@ -1418,7 +1431,7 @@
               npcData.traits.type === "IRON_GOLEM" ||
               npcData.traits.type === "WITCH"
             ) {
-              console.log("processed", npcData.traits.type)
+              console.log("processed", npcData.traits.type);
               // Create JSON object for NPC data
               npcObject = {
                 name: npcName.toLowerCase(),
@@ -1478,7 +1491,7 @@
                   "\nPlease report this in the typewriter discord server.",
               );
             }
-            console.log("forEach loop part 2 reached for npc.name")
+            console.log("forEach loop part 2 reached for npc.name");
 
             //funcion for checking for data
             function checkData(data) {
@@ -1498,10 +1511,12 @@
                 // Add glowing effect ID to the data list
                 npcObject.entries[0].data.push(glowingEffectId);
               }
-              if (npcData &&
-                  npcData.traits &&
-                  npcData.traits.age &&
-                  npcData.traits.age.age < 0) {
+              if (
+                npcData &&
+                npcData.traits &&
+                npcData.traits.age &&
+                npcData.traits.age.age < 0
+              ) {
                 npcObject.entries.push({
                   id: ageableId,
                   name: npcName.toLowerCase() + "_ageable_data",
@@ -1512,7 +1527,11 @@
                 // Add ageable effect ID to the data list
                 npcObject.entries[0].data.push(ageableId);
               }
-              if (npcData && npcData.metadata && npcData.metadata['minecraft-ai']) {
+              if (
+                npcData &&
+                npcData.metadata &&
+                npcData.metadata["minecraft-ai"]
+              ) {
                 npcObject.entries.push({
                   id: playerCloseID,
                   name: npcName.toLowerCase() + "_player_close_by_activity",
@@ -1533,7 +1552,7 @@
               }
             }
 
-            console.log("forEach loop part 3 reached for npc.name")
+            console.log("forEach loop part 3 reached for npc.name");
             // Create a Blob object containing the JSON data
             const blob = new Blob([JSON.stringify(npcObject, null, 2)], {
               type: "application/json",
@@ -1555,7 +1574,6 @@
           yamlDownloadLink.href = URL.createObjectURL(yamlBlob);
           yamlDownloadLink.download = "saves.yml";
           yamlDownloadLink.click();
-          
         }
       }
     </script>
