@@ -753,245 +753,28 @@
 
               const headUrl = "images/villager/villager_head.png";
               let fullBodyUrl = "villager_full_body.png";
-              if (biome === "DESERT") {
-                if (profession === "ARMORER") {
-                  fullBodyUrl = "images/villager/desert/desert_armorer.png";
-                } else if (profession === "BUTCHER") {
-                  fullBodyUrl = "images/villager/desert/desert_butcher.png";
-                } else if (profession === "CARTOGRAPHER") {
-                  fullBodyUrl =
-                    "images/villager/desert/desert_cartographer.png";
-                } else if (profession === "CLERIC") {
-                  fullBodyUrl = "images/villager/desert/desert_cleric.png";
-                } else if (profession === "FARMER") {
-                  fullBodyUrl = "images/villager/desert/desert_farmer.png";
-                } else if (profession === "FISHERMAN") {
-                  fullBodyUrl = "images/villager/desert/desert_fisherman.png";
-                } else if (profession === "FLETCHER") {
-                  fullBodyUrl = "images/villager/desert/desert_fletcher.png";
-                } else if (profession === "LEATHERWORKER") {
-                  fullBodyUrl =
-                    "images/villager/desert/desert_leatherworker.png";
-                } else if (profession === "LIBRARIAN") {
-                  fullBodyUrl = "images/villager/desert/desert_librarian.png";
-                } else if (profession === "MASON") {
-                  fullBodyUrl = "images/villager/desert/desert_mason.png";
-                } else if (profession === "SHEPHERD") {
-                  fullBodyUrl = "images/villager/desert/desert_shepherd.png";
-                } else if (profession === "TOOLSMITH") {
-                  fullBodyUrl = "images/villager/desert/desert_toolsmith.png";
-                } else if (profession === "WEAPONSMITH") {
-                  fullBodyUrl = "images/villager/desert/desert_weaponsmith.png";
-                } else if (profession === "NITWIT") {
-                  fullBodyUrl = "images/villager/desert/desert_nitwit.png";
-                } else {
-                  fullBodyUrl = "images/villager/desert/desert_none.png";
-                }
-              } else if (biome === "JUNGLE") {
-                if (profession === "ARMORER") {
-                  fullBodyUrl = "images/villager/jungle/jungle_armorer.png";
-                } else if (profession === "BUTCHER") {
-                  fullBodyUrl = "images/villager/jungle/jungle_butcher.png";
-                } else if (profession === "CARTOGRAPHER") {
-                  fullBodyUrl =
-                    "images/villager/jungle/jungle_cartographer.png";
-                } else if (profession === "CLERIC") {
-                  fullBodyUrl = "images/villager/jungle/jungle_cleric.png";
-                } else if (profession === "FARMER") {
-                  fullBodyUrl = "images/villager/jungle/jungle_farmer.png";
-                } else if (profession === "FISHERMAN") {
-                  fullBodyUrl = "images/villager/jungle/jungle_fisherman.png";
-                } else if (profession === "FLETCHER") {
-                  fullBodyUrl = "images/villager/jungle/jungle_fletcher.png";
-                } else if (profession === "LEATHERWORKER") {
-                  fullBodyUrl =
-                    "images/villager/jungle/jungle_leatherworker.png";
-                } else if (profession === "LIBRARIAN") {
-                  fullBodyUrl = "images/villager/jungle/jungle_librarian.png";
-                } else if (profession === "MASON") {
-                  fullBodyUrl = "images/villager/jungle/jungle_mason.png";
-                } else if (profession === "SHEPHERD") {
-                  fullBodyUrl = "images/villager/jungle/jungle_shepherd.png";
-                } else if (profession === "TOOLSMITH") {
-                  fullBodyUrl = "images/villager/jungle/jungle_toolsmith.png";
-                } else if (profession === "WEAPONSMITH") {
-                  fullBodyUrl = "images/villager/jungle/jungle_weaponsmith.png";
-                } else if (profession === "NITWIT") {
-                  fullBodyUrl = "images/villager/jungle/jungle_nitwit.png";
-                } else {
-                  fullBodyUrl = "images/villager/jungle/jungle_none.png";
-                }
-              } else if (biome === "SAVANNAH") {
-                if (profession === "ARMORER") {
-                  fullBodyUrl = "images/villager/savannah/savannah_armorer.png";
-                } else if (profession === "BUTCHER") {
-                  fullBodyUrl = "images/villager/savannah/savannah_butcher.png";
-                } else if (profession === "CARTOGRAPHER") {
-                  fullBodyUrl =
-                    "images/villager/savannah/savannah_cartographer.png";
-                } else if (profession === "CLERIC") {
-                  fullBodyUrl = "images/villager/savannah/savannah_cleric.png";
-                } else if (profession === "FARMER") {
-                  fullBodyUrl = "images/villager/savannah/savannah_farmer.png";
-                } else if (profession === "FISHERMAN") {
-                  fullBodyUrl =
-                    "images/villager/savannah/savannah_fisherman.png";
-                } else if (profession === "FLETCHER") {
-                  fullBodyUrl =
-                    "images/villager/savannah/savannah_fletcher.png";
-                } else if (profession === "LEATHERWORKER") {
-                  fullBodyUrl =
-                    "images/villager/savannah/savannah_leatherworker.png";
-                } else if (profession === "LIBRARIAN") {
-                  fullBodyUrl =
-                    "images/villager/savannah/savannah_librarian.png";
-                } else if (profession === "MASON") {
-                  fullBodyUrl = "images/villager/savannah/savannah_mason.png";
-                } else if (profession === "SHEPHERD") {
-                  fullBodyUrl =
-                    "images/villager/savannah/savannah_shepherd.png";
-                } else if (profession === "TOOLSMITH") {
-                  fullBodyUrl =
-                    "images/villager/savannah/savannah_toolsmith.png";
-                } else if (profession === "WEAPONSMITH") {
-                  fullBodyUrl =
-                    "images/villager/savannah/savannah_weaponsmith.png";
-                } else if (profession === "NITWIT") {
-                  fullBodyUrl = "images/villager/savannah/savannah_nitwit.png";
-                } else {
-                  fullBodyUrl = "images/villager/savannah/savannah_none.png";
-                }
-              } else if (biome === "SNOW") {
-                if (profession === "ARMORER") {
-                  fullBodyUrl = "images/villager/snow/snow_armorer.png";
-                } else if (profession === "BUTCHER") {
-                  fullBodyUrl = "images/villager/snow/snow_butcher.png";
-                } else if (profession === "CARTOGRAPHER") {
-                  fullBodyUrl = "images/villager/snow/snow_cartographer.png";
-                } else if (profession === "CLERIC") {
-                  fullBodyUrl = "images/villager/snow/snow_cleric.png";
-                } else if (profession === "FARMER") {
-                  fullBodyUrl = "images/villager/snow/snow_farmer.png";
-                } else if (profession === "FISHERMAN") {
-                  fullBodyUrl = "images/villager/snow/snow_fisherman.png";
-                } else if (profession === "FLETCHER") {
-                  fullBodyUrl = "images/villager/snow/snow_fletcher.png";
-                } else if (profession === "LEATHERWORKER") {
-                  fullBodyUrl = "images/villager/snow/snow_leatherworker.png";
-                } else if (profession === "LIBRARIAN") {
-                  fullBodyUrl = "images/villager/snow/snow_librarian.png";
-                } else if (profession === "MASON") {
-                  fullBodyUrl = "images/villager/snow/snow_mason.png";
-                } else if (profession === "SHEPHERD") {
-                  fullBodyUrl = "images/villager/snow/snow_shepherd.png";
-                } else if (profession === "TOOLSMITH") {
-                  fullBodyUrl = "images/villager/snow/snow_toolsmith.png";
-                } else if (profession === "WEAPONSMITH") {
-                  fullBodyUrl = "images/villager/snow/snow_weaponsmith.png";
-                } else if (profession === "NITWIT") {
-                  fullBodyUrl = "images/villager/snow/snow_nitwit.png";
-                } else {
-                  fullBodyUrl = "images/villager/snow/snow_none.png";
-                }
-              } else if (biome === "SWAMP") {
-                if (profession === "ARMORER") {
-                  fullBodyUrl = "images/villager/swamp/swamp_armorer.png";
-                } else if (profession === "BUTCHER") {
-                  fullBodyUrl = "images/villager/swamp/swamp_butcher.png";
-                } else if (profession === "CARTOGRAPHER") {
-                  fullBodyUrl = "images/villager/swamp/swamp_cartographer.png";
-                } else if (profession === "CLERIC") {
-                  fullBodyUrl = "images/villager/swamp/swamp_cleric.png";
-                } else if (profession === "FARMER") {
-                  fullBodyUrl = "images/villager/swamp/swamp_farmer.png";
-                } else if (profession === "FISHERMAN") {
-                  fullBodyUrl = "images/villager/swamp/swamp_fisherman.png";
-                } else if (profession === "FLETCHER") {
-                  fullBodyUrl = "images/villager/swamp/swamp_fletcher.png";
-                } else if (profession === "LEATHERWORKER") {
-                  fullBodyUrl = "images/villager/swamp/swamp_leatherworker.png";
-                } else if (profession === "LIBRARIAN") {
-                  fullBodyUrl = "images/villager/swamp/swamp_librarian.png";
-                } else if (profession === "MASON") {
-                  fullBodyUrl = "images/villager/swamp/swamp_mason.png";
-                } else if (profession === "SHEPHERD") {
-                  fullBodyUrl = "images/villager/swamp/swamp_shepherd.png";
-                } else if (profession === "TOOLSMITH") {
-                  fullBodyUrl = "images/villager/swamp/swamp_toolsmith.png";
-                } else if (profession === "WEAPONSMITH") {
-                  fullBodyUrl = "images/villager/swamp/swamp_weaponsmith.png";
-                } else if (profession === "NITWIT") {
-                  fullBodyUrl = "images/villager/swamp/swamp_nitwit.png";
-                } else {
-                  fullBodyUrl = "images/villager/swamp/swamp_none.png";
-                }
-              } else if (biome === "TAIGA") {
-                if (profession === "ARMORER") {
-                  fullBodyUrl = "images/villager/taiga/taiga_armorer.png";
-                } else if (profession === "BUTCHER") {
-                  fullBodyUrl = "images/villager/taiga/taiga_butcher.png";
-                } else if (profession === "CARTOGRAPHER") {
-                  fullBodyUrl = "images/villager/taiga/taiga_cartographer.png";
-                } else if (profession === "CLERIC") {
-                  fullBodyUrl = "images/villager/taiga/taiga_cleric.png";
-                } else if (profession === "FARMER") {
-                  fullBodyUrl = "images/villager/taiga/taiga_farmer.png";
-                } else if (profession === "FISHERMAN") {
-                  fullBodyUrl = "images/villager/taiga/taiga_fisherman.png";
-                } else if (profession === "FLETCHER") {
-                  fullBodyUrl = "images/villager/taiga/taiga_fletcher.png";
-                } else if (profession === "LEATHERWORKER") {
-                  fullBodyUrl = "images/villager/taiga/taiga_leatherworker.png";
-                } else if (profession === "LIBRARIAN") {
-                  fullBodyUrl = "images/villager/taiga/taiga_librarian.png";
-                } else if (profession === "MASON") {
-                  fullBodyUrl = "images/villager/taiga/taiga_mason.png";
-                } else if (profession === "SHEPHERD") {
-                  fullBodyUrl = "images/villager/taiga/taiga_shepherd.png";
-                } else if (profession === "TOOLSMITH") {
-                  fullBodyUrl = "images/villager/taiga/taiga_toolsmith.png";
-                } else if (profession === "WEAPONSMITH") {
-                  fullBodyUrl = "images/villager/taiga/taiga_weaponsmith.png";
-                } else if (profession === "NITWIT") {
-                  fullBodyUrl = "images/villager/taiga/taiga_nitwit.png";
-                } else {
-                  fullBodyUrl = "images/villager/taiga/taiga_none.png";
-                }
-              } else {
-                if (profession === "ARMORER") {
-                  fullBodyUrl = "images/villager/plains/plains_armorer.png";
-                } else if (profession === "BUTCHER") {
-                  fullBodyUrl = "images/villager/plains/plains_butcher.png";
-                } else if (profession === "CARTOGRAPHER") {
-                  fullBodyUrl =
-                    "images/villager/plains/plains_cartographer.png";
-                } else if (profession === "CLERIC") {
-                  fullBodyUrl = "images/villager/plains/plains_cleric.png";
-                } else if (profession === "FARMER") {
-                  fullBodyUrl = "images/villager/plains/plains_farmer.png";
-                } else if (profession === "FISHERMAN") {
-                  fullBodyUrl = "images/villager/plains/plains_fisherman.png";
-                } else if (profession === "FLETCHER") {
-                  fullBodyUrl = "images/villager/plains/plains_fletcher.png";
-                } else if (profession === "LEATHERWORKER") {
-                  fullBodyUrl =
-                    "images/villager/plains/plains_leatherworker.png";
-                } else if (profession === "LIBRARIAN") {
-                  fullBodyUrl = "images/villager/plains/plains_librarian.png";
-                } else if (profession === "MASON") {
-                  fullBodyUrl = "images/villager/plains/plains_mason.png";
-                } else if (profession === "SHEPHERD") {
-                  fullBodyUrl = "images/villager/plains/plains_shepherd.png";
-                } else if (profession === "TOOLSMITH") {
-                  fullBodyUrl = "images/villager/plains/plains_toolsmith.png";
-                } else if (profession === "WEAPONSMITH") {
-                  fullBodyUrl = "images/villager/plains/plains_weaponsmith.png";
-                } else if (profession === "NITWIT") {
-                  fullBodyUrl = "images/villager/plains/plains_nitwit.png";
-                } else {
-                  fullBodyUrl = "images/villager/plains/plains_none.png";
-                }
-              }
+            const imagePaths = {
+              DESERT: "images/villager/desert/desert_",
+              JUNGLE: "images/villager/jungle/jungle_",
+              SAVANNAH: "images/villager/savannah/savannah_",
+              SNOW: "images/villager/snow/snow_",
+              SWAMP: "images/villager/swamp/swamp_",
+              TAIGA: "images/villager/taiga/taiga_",
+              PLAINS: "images/villager/plains/plains_"
+            };
+
+            const professions = [
+              "armorer", "butcher", "cartographer", "cleric", "farmer",
+              "fisherman", "fletcher", "leatherworker", "librarian", 
+              "mason", "shepherd", "toolsmith", "weaponsmith", "nitwit", "none"
+            ];
+
+            if (imagePaths[biome]) {
+              fullBodyUrl = imagePaths[biome] + (professions.includes(profession.toLowerCase()) ? profession.toLowerCase() : "none") + ".png";
+            } else {
+              fullBodyUrl = imagePaths.PLAINS + "none.png";
+            }
+
 
               // Create an image element for the NPC's head
               const npcImage = document.createElement("img");
