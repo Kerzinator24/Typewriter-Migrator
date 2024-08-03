@@ -753,28 +753,44 @@
 
               const headUrl = "images/villager/villager_head.png";
               let fullBodyUrl = "villager_full_body.png";
-            const imagePaths = {
-              DESERT: "images/villager/desert/desert_",
-              JUNGLE: "images/villager/jungle/jungle_",
-              SAVANNAH: "images/villager/savannah/savannah_",
-              SNOW: "images/villager/snow/snow_",
-              SWAMP: "images/villager/swamp/swamp_",
-              TAIGA: "images/villager/taiga/taiga_",
-              PLAINS: "images/villager/plains/plains_"
-            };
+              const imagePaths = {
+                DESERT: "images/villager/desert/desert_",
+                JUNGLE: "images/villager/jungle/jungle_",
+                SAVANNAH: "images/villager/savannah/savannah_",
+                SNOW: "images/villager/snow/snow_",
+                SWAMP: "images/villager/swamp/swamp_",
+                TAIGA: "images/villager/taiga/taiga_",
+                PLAINS: "images/villager/plains/plains_",
+              };
 
-            const professions = [
-              "armorer", "butcher", "cartographer", "cleric", "farmer",
-              "fisherman", "fletcher", "leatherworker", "librarian", 
-              "mason", "shepherd", "toolsmith", "weaponsmith", "nitwit", "none"
-            ];
+              const professions = [
+                "armorer",
+                "butcher",
+                "cartographer",
+                "cleric",
+                "farmer",
+                "fisherman",
+                "fletcher",
+                "leatherworker",
+                "librarian",
+                "mason",
+                "shepherd",
+                "toolsmith",
+                "weaponsmith",
+                "nitwit",
+                "none",
+              ];
 
-            if (imagePaths[biome]) {
-              fullBodyUrl = imagePaths[biome] + (professions.includes(profession.toLowerCase()) ? profession.toLowerCase() : "none") + ".png";
-            } else {
-              fullBodyUrl = imagePaths.PLAINS + "none.png";
-            }
-
+              if (imagePaths[biome]) {
+                fullBodyUrl =
+                  imagePaths[biome] +
+                  (professions.includes(profession.toLowerCase())
+                    ? profession.toLowerCase()
+                    : "none") +
+                  ".png";
+              } else {
+                fullBodyUrl = imagePaths.PLAINS + "none.png";
+              }
 
               // Create an image element for the NPC's head
               const npcImage = document.createElement("img");
