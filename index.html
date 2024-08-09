@@ -314,7 +314,7 @@
                       return checkbox.value;
                     });
                     selectedModules.push(...checkedFiles); // Add selected files to the array
-                    console.log("Selected Modules:", selectedModules); // Output selected modules to console
+                    //console.log("Selected Modules:", selectedModules); // Output selected modules to console
 
                     // Check if migration is needed
                     checkIfMigrationNeeded(selectedModules);
@@ -328,7 +328,7 @@
                   .getElementById("uploadArea")
                   .appendChild(confirmButton);
               } else {
-                console.log("No files selected for migration.");
+                //console.log("No files selected for migration.");
               }
             });
           });
@@ -380,7 +380,7 @@
 
                   // Delete the reference_npc entry
                   pageData.entries.splice(index, 1);
-                  console.log("Removed reference_npc entry:", pageData);
+                  //console.log("Removed reference_npc entry:", pageData);
                 }
                 if (entry.type === "on_npc_interact") {
                   // Rename the on npc interact entry to entity_interact_event
@@ -390,7 +390,7 @@
                   entry.definition = entry.identifier;
                   delete entry.identifier;
                   // Log the entry to console
-                  console.log("Modified Entry:", entry);
+                  //console.log("Modified Entry:", entry);
                 }
               });
             }
@@ -398,11 +398,11 @@
         });
 
         // Log the list of NPC IDs to console
-        console.log("NPC IDs of reference NPCs:", npcIds);
+        //console.log("NPC IDs of reference NPCs:", npcIds);
         // Log the array of page names and content to console
-        console.log("Pages Data:", pagesData);
+        //console.log("Pages Data:", pagesData);
         // Log the array of NPC indexes to console
-        console.log("NPC Indexes:", npcIndexes);
+        //console.log("NPC Indexes:", npcIndexes);
       }
 
       function migrateFolder(zip) {
@@ -586,9 +586,9 @@
                 const file = this.files[0];
                 if (!file) return;
                 // Handle file upload
-                console.log("Uploading file:", file);
+                //console.log("Uploading file:", file);
                 if (fileName.includes("Citizens")) {
-                  console.log("Citizens upload detected");
+                  //console.log("Citizens upload detected");
                 }
                 if (file.name === "saves.yml") {
                   const reader = new FileReader();
@@ -597,7 +597,7 @@
                     try {
                       jsonData = jsyaml.load(yamlContent); // Parse YAML to JSON
                       let savesContent = yamlContent; // Store the JSON content in a global variable
-                      console.log(jsonData); // Output JSON to console
+                      //console.log(jsonData); // Output JSON to console
                     } catch (error) {
                       console.error("Error parsing YAML:", error);
                     }
@@ -643,9 +643,9 @@
 
             // Determine if all NPCs should be selected based on migration mode
             if (MigrationMode === "all") {
-              console.log(typeof npcIds[0]);
+              //console.log(typeof npcIds[0]);
               if (npcIds.includes(parseInt(npcId))) {
-                console.log("success");
+                //console.log("success");
                 checkbox.checked = true;
               }
             }
@@ -733,8 +733,8 @@
 
                 // Append the image to the NPC info container
                 npcInfoContainer.appendChild(npcImage);
-                console.log(npc.name);
-                console.log(npc.traits.type);
+                //console.log(npc.name);
+                //console.log(npc.traits.type);
               } catch (error) {
                 console.error(
                   "Error parsing textureRaw JSON:" + npc.name,
@@ -888,7 +888,7 @@
               // Append the image to the NPC info container
               npcInfoContainer.appendChild(npcImage);
             } else {
-              console.log(npc);
+              //console.log(npc);
             }
 
             // Create an unordered list for NPC details
@@ -977,7 +977,7 @@
           );
           const selNPC = Array.from(selectedNPCs);
           selectedNPCs.forEach((npc) => {
-            console.log("forEach loop reached for npc.name");
+            //console.log("forEach loop reached for npc.name");
             const npcId = npc.value;
             const npcData = jsonData.npc[npcId];
             const npcName = npcData.name;
@@ -1012,18 +1012,18 @@
             );
 
             // Log the current NPC ID and the found entry
-            console.log("Current NPC ID:", currentNpcId);
-            console.log("Found NPC Entry:", npcEntry);
+            //console.log("Current NPC ID:", currentNpcId);
+            //console.log("Found NPC Entry:", npcEntry);
 
             // If found, set the definitionId
             if (npcEntry) {
               const definitionId = npcEntry.npcEntryId;
-              console.log("Definition ID set:", definitionId);
+              //console.log("Definition ID set:", definitionId);
             } else {
-              console.log("NPC ID not found in npcIdEntryArray");
-              console.log(npcIdEntryArray);
+              //console.log("NPC ID not found in npcIdEntryArray");
+              //console.log(npcIdEntryArray);
             }
-            console.log("reached part 1");
+            //console.log("reached part 1");
             // Check if NPC type is "PLAYER"
             if (npcData.traits.type === "PLAYER") {
               // Extract relevant traits
@@ -1109,7 +1109,7 @@
                     return "";
                 }
               }
-              console.log("reached part 1.1");
+              //console.log("reached part 1.1");
               // Create JSON object for NPC data
               npcObject = {
                 name: npcName.toLowerCase(),
@@ -1184,7 +1184,7 @@
               npcData.traits.type === "IRON_GOLEM" ||
               npcData.traits.type === "WITCH"
             ) {
-              console.log("processed", npcData.traits.type);
+              //console.log("processed", npcData.traits.type);
               // Create JSON object for NPC data
               npcObject = {
                 name: npcName.toLowerCase(),
@@ -1244,7 +1244,7 @@
                   "\nPlease report this in the typewriter discord server.",
               );
             }
-            console.log("forEach loop part 2 reached for npc.name");
+            //console.log("forEach loop part 2 reached for npc.name");
 
             //funcion for checking for data
             function checkData(data) {
@@ -1305,7 +1305,7 @@
               }
             }
 
-            console.log("forEach loop part 3 reached for npc.name");
+            //console.log("forEach loop part 3 reached for npc.name");
             // Create a Blob object containing the JSON data
             const blob = new Blob([JSON.stringify(npcObject, null, 2)], {
               type: "application/json",
@@ -1320,7 +1320,7 @@
           });
 
           const yamlData = jsyaml.dump(jsonData, { lineWidth: -1 });
-          console.log(yamlData); // Output YAML to console
+          //console.log(yamlData); // Output YAML to console
           //download the yaml file
           const yamlBlob = new Blob([yamlData], { type: "application/yaml" });
           const yamlDownloadLink = document.createElement("a");
