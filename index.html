@@ -343,6 +343,8 @@
       let npcIndexes = [];
       // Object to store NPC ID and entry ID pairs
       let npcIdEntryArray = [];
+      // Array for NPCs with error
+      let notMigratableNPCs = [];
 
       // Function to unzip the pages directory and search for reference NPCs
       async function fetchPagesContent(zip) {
@@ -1241,8 +1243,10 @@
               alert(
                 "NPC type not supported: " +
                   npcData.traits.type +
-                  "\nPlease report this in the typewriter discord server.",
+                  "\nPlease report this to Kerzinator_24 on Discord.",
               );
+              //add npc id to notMigratableNPCs
+              notMigratableNPCs.push(npcId);
             }
             //console.log("forEach loop part 2 reached for npc.name");
 
@@ -1311,12 +1315,24 @@
               type: "application/json",
             });
 
+            if (notMigratableNPCs.includes(npcId)) {
+              //console.log("not migratable npc", npcId);
+              //console.log("not migratable npc", npcName);
+              //console.log("not migratable npc", npcData);
+              //console.log("not migratable npc", npcObject);
+              //console.log("not migratable npc", npcObject.entries);
+              //console.log("not migratable npc", npcObject.entries[0].data);
+              //console.log("not migratable npc", npcObject.entries[0].data[0]);
+              //console.log("not migratable npc", npcObject.entries[0].data[0].split("_")[0]);
+              //console.log("not migratable npc", npcObject.entries[0].data[0].split("_")[1]);
+            } else {
             // Create a download link
             const downloadLink = document.createElement("a");
             downloadLink.href = URL.createObjectURL(blob);
             downloadLink.download = npcName + ".json";
             downloadLink.click();
             delete jsonData.npc[npcId];
+            }
           });
 
           const yamlData = jsyaml.dump(jsonData, { lineWidth: -1 });
