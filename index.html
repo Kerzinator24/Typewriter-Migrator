@@ -150,14 +150,13 @@
       }
 
       .version {
-          padding: 10px;
-          color: white;
-          font-size: 14px;
-          position: absolute;
-          bottom: 0;
-          left: 0;
+        padding: 10px;
+        color: white;
+        font-size: 14px;
+        position: absolute;
+        bottom: 0;
+        left: 0;
       }
-
     </style>
   </head>
   <body>
@@ -419,33 +418,20 @@
       }
 
       function migrateFolder(zip) {
-        // Fetch content of files inside "pages" directory
-        fetchPagesContent(zip);
-
         return new Promise(function (resolve) {
-          const topLevelFolders = Object.keys(zip.files);
-          const adaptersFolderName = topLevelFolders.find((folderName) =>
-            folderName.endsWith("/adapters/"),
-          );
-          if (!adaptersFolderName) return resolve([]); // If adapters folder doesn't exist, return an empty array
+          let jarFiles = [];
 
-          const adaptersFolder = zip.folder(adaptersFolderName);
-          let files = [];
-          adaptersFolder.forEach(function (relativePath, zipEntry) {
-            if (!zipEntry.dir) {
-              // If it's a file
-              files.push(zipEntry.name);
+          // Iterate through all files in the zip
+          Object.keys(zip.files).forEach(function (fileName) {
+            // Check if the file is not a directory and has a .jar extension
+            if (!zip.files[fileName].dir && fileName.endsWith(".jar")) {
+              jarFiles.push(fileName);
             }
           });
 
-          //declare the accepted modules
-          const acceptedModules = ["Citizens", "WorldGuard", "MythicMobs"];
+          console.log("Found .jar files:", jarFiles); // Log the found .jar files
 
-          // Remove the adapters not in the acceptedModules list
-          files = files.filter((file) =>
-            acceptedModules.some((m) => file.includes(m)),
-          );
-          resolve(files);
+          resolve(jarFiles);
         });
       }
 
@@ -1337,12 +1323,12 @@
               //console.log("not migratable npc", npcObject.entries[0].data[0].split("_")[0]);
               //console.log("not migratable npc", npcObject.entries[0].data[0].split("_")[1]);
             } else {
-            // Create a download link
-            const downloadLink = document.createElement("a");
-            downloadLink.href = URL.createObjectURL(blob);
-            downloadLink.download = npcName + ".json";
-            downloadLink.click();
-            delete jsonData.npc[npcId];
+              // Create a download link
+              const downloadLink = document.createElement("a");
+              downloadLink.href = URL.createObjectURL(blob);
+              downloadLink.download = npcName + ".json";
+              downloadLink.click();
+              delete jsonData.npc[npcId];
             }
           });
 
