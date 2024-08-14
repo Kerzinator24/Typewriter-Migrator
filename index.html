@@ -358,53 +358,51 @@
 
       // Function to unzip the pages directory and search for reference NPCs
       async function fetchPagesContent(zip) {
-        const topLevelFolders = Object.keys(zip.files);
-        const pagesFolderName = topLevelFolders.find((folderName) =>
-          folderName.endsWith("/pages/"),
-        );
-        if (!pagesFolderName) return; // If pages folder doesn't exist, return
+        const pagesData = [];
+        const npcIds = [];
+        const npcIndexes = [];
+        const npcIdEntryArray = [];
 
-        const pagesFolder = zip.folder(pagesFolderName);
+        // Loop through all files in the ZIP archive
+        await zip.forEach(async function (relativePath, zipEntry) {
+          if (!zipEntry.dir && relativePath.endsWith(".json")) {
+            // Check if the file is inside a "pages" folder
+            const pathSegments = relativePath.split("/");
+            if (pathSegments.includes("pages")) {
+              const fileContent = await zipEntry.async("text");
+              const pageData = JSON.parse(fileContent);
 
-        await pagesFolder.forEach(async function (relativePath, zipEntry) {
-          if (!zipEntry.dir) {
-            // If it's a file
-            const fileContent = await zipEntry.async("text");
-            const pageData = JSON.parse(fileContent);
+              // Store page name and content
+              pagesData.push({ name: zipEntry.name, content: pageData });
 
-            // Store page name and content
-            pagesData.push({ name: zipEntry.name, content: pageData });
+              // Search for reference NPCs in the entries of each page
+              if (pageData.entries) {
+                pageData.entries.forEach((entry, index) => {
+                  if (entry.type === "reference_npc") {
+                    npcIds.push(entry.npcId);
+                    npcIndexes.push({ page: pagesData.length - 1, index });
 
-            // Search for reference NPCs in the entries of each page
-            if (pageData.entries) {
-              pageData.entries.forEach((entry, index) => {
-                if (entry.type === "reference_npc") {
-                  npcIds.push(entry.npcId);
-                  npcIndexes.push({ page: pagesData.length - 1, index });
+                    // Adding NPC's npcId and entryId in key-value pairs as subarrays with variable names
+                    const npcEntryId = entry.id;
+                    const npcId = entry.npcId;
+                    npcIdEntryArray.push({
+                      npcEntryId: npcEntryId,
+                      npcId: npcId,
+                    });
 
-                  // Adding NPC's npcId and entryId in key-value pairs as subarrays with variable names
-                  const npcEntryId = entry.id;
-                  const npcId = entry.npcId;
-                  npcIdEntryArray.push({
-                    npcEntryId: npcEntryId,
-                    npcId: npcId,
-                  });
-
-                  // Delete the reference_npc entry
-                  pageData.entries.splice(index, 1);
-                  //console.log("Removed reference_npc entry:", pageData);
-                }
-                if (entry.type === "on_npc_interact") {
-                  // Rename the on npc interact entry to entity_interact_event
-                  entry.type = "entity_interact_event";
-                  entry.name = "new_entity_interact_event";
-                  // Change "identifier" to "definition"
-                  entry.definition = entry.identifier;
-                  delete entry.identifier;
-                  // Log the entry to console
-                  //console.log("Modified Entry:", entry);
-                }
-              });
+                    // Delete the reference_npc entry
+                    pageData.entries.splice(index, 1);
+                  }
+                  if (entry.type === "on_npc_interact") {
+                    // Rename the on npc interact entry to entity_interact_event
+                    entry.type = "entity_interact_event";
+                    entry.name = "new_entity_interact_event";
+                    // Change "identifier" to "definition"
+                    entry.definition = entry.identifier;
+                    delete entry.identifier;
+                  }
+                });
+              }
             }
           }
         });
