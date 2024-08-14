@@ -192,6 +192,10 @@
     <div id="npcModal" class="modal">
       <div class="modal-content">
         <h2 class="text-xl font-bold mb-4">Select NPCs to Migrate</h2>
+
+        <!-- Manual Mode Input Field -->
+        <div id="manualModeContainer"></div>
+
         <div id="npcList" class="scrollable">
           <!-- NPC checkboxes will be appended here -->
         </div>
@@ -208,6 +212,7 @@
       let migrateTypewriter = false;
       let MigrationMode = "none"; // Default value
       let modalDisplayed = false; // Variable to track modal display state
+      let manualMode = false; // Variable to track manual mode state
 
       // Array of modules that can be migrated
       const migratableModules = [
@@ -274,7 +279,7 @@
                       "delay-800",
                       "animate__animated",
                       "animate__fadeIn",
-                      "animate__delay-" + (index + 1),
+                      "animate__delay-" + (index / 10),
                       "animate__slideInFromTop",
                     );
 
@@ -308,7 +313,7 @@
                       "delay-800",
                       "animate__animated",
                       "animate__fadeIn",
-                      "animate__delay-" + (index + 1),
+                      "animate__delay-" + (index / 1.4),
                     );
                   }, 800 * index);
                 });
@@ -324,7 +329,7 @@
                       return checkbox.value;
                     });
                     selectedModules.push(...checkedFiles); // Add selected files to the array
-                    //console.log("Selected Modules:", selectedModules); // Output selected modules to console
+                    console.log("Selected Modules:", selectedModules); // Output selected modules to console
 
                     // Check if migration is needed
                     checkIfMigrationNeeded(selectedModules);
@@ -338,7 +343,7 @@
                   .getElementById("uploadArea")
                   .appendChild(confirmButton);
               } else {
-                //console.log("No files selected for migration.");
+                console.log("No files selected for migration.");
               }
             });
           });
@@ -366,14 +371,16 @@
         // Loop through all files in the ZIP archive
         await zip.forEach(async function (relativePath, zipEntry) {
           if (!zipEntry.dir && relativePath.endsWith(".json")) {
-            // Check if the file is inside a "pages" folder
+            // Split the relative path to handle subfolders
             const pathSegments = relativePath.split("/");
+
+            // Check if the file is inside a "pages" folder, considering subfolders
             if (pathSegments.includes("pages")) {
               const fileContent = await zipEntry.async("text");
               const pageData = JSON.parse(fileContent);
 
-              // Store page name and content
-              pagesData.push({ name: zipEntry.name, content: pageData });
+              // Store page name (including path) and content
+              pagesData.push({ name: relativePath, content: pageData });
 
               // Search for reference NPCs in the entries of each page
               if (pageData.entries) {
@@ -408,30 +415,24 @@
         });
 
         // Log the list of NPC IDs to console
-        //console.log("NPC IDs of reference NPCs:", npcIds);
+        console.log("NPC IDs of reference NPCs:", npcIds);
         // Log the array of page names and content to console
-        //console.log("Pages Data:", pagesData);
+        console.log("Pages Data:", pagesData);
         // Log the array of NPC indexes to console
-        //console.log("NPC Indexes:", npcIndexes);
+        console.log("NPC Indexes:", npcIndexes);
       }
 
       function migrateFolder(zip) {
         return new Promise(function (resolve) {
-          let jarFiles = [];
-
-          // Iterate through all files in the zip
-          Object.keys(zip.files).forEach(function (fileName) {
-            // Check if the file is not a directory and has a .jar extension
-            if (!zip.files[fileName].dir && fileName.endsWith(".jar")) {
-              jarFiles.push(fileName);
-            }
-          });
+          // Filter all files in the zip that have a .jar extension
+          let jarFiles = Object.keys(zip.files).filter(relativePath => relativePath.endsWith(".jar"));
 
           console.log("Found .jar files:", jarFiles); // Log the found .jar files
 
           resolve(jarFiles);
         });
       }
+
 
       function confirmFiles(files) {
         const confirmedFiles = [];
@@ -446,13 +447,33 @@
       }
 
       function formatFileName(filePath) {
-        const formattedFileName = filePath
-          .split("/")
-          .pop()
-          .replace(/\.jar$/i, "")
-          .replace(/([a-z])([A-Z])/g, "$1 $2")
-          .replace(/Adapter/g, "")
-          .trim();
+        // Check if the file is in a root-level folder or current directory
+        const folderPath = filePath.substring(0, filePath.lastIndexOf("\\"));
+        const inRootOrCurrentDirectory = !folderPath.includes("\\") && !folderPath.includes("/");
+        console.log(inRootOrCurrentDirectory)
+        let formattedFileName = "";
+
+        if (inRootOrCurrentDirectory) {
+          formattedFileName = filePath
+            .split("/")
+            .pop()
+            .replace(/\.jar$/i, "")
+            .replace(/([a-z])([A-Z])/g, "$1 $2")
+            .replace(/Adapter/g, "")
+            .trim();
+        } else {
+          // Get the part after the last backslash
+          const fileName = filePath.split("\\").pop();
+
+          // Format the file name
+          formattedFileName = fileName
+            .replace(/\.jar$/i, "")
+            .replace(/([a-z])([A-Z])/g, "$1 $2")
+            .replace(/Adapter/g, "")
+            .trim();
+        }
+
+        // Return null if "Basic" is included, otherwise return the formatted file name
         return formattedFileName.includes("Basic") ? null : formattedFileName;
       }
 
@@ -528,6 +549,17 @@
         closeModal();
       }
 
+      function encodeBase64(str) {
+        // Convert the string to a Uint8Array
+        const utf8 = new TextEncoder().encode(str);
+
+        // Convert the Uint8Array to a binary string
+        const binaryString = String.fromCharCode(...utf8);
+
+        // Encode the binary string to base64
+        return btoa(binaryString);
+      }
+
       // Function to display selected modules
       function displaySelectedModules(selectedModules) {
         const fileList = document.getElementById("fileList");
@@ -583,9 +615,9 @@
                 const file = this.files[0];
                 if (!file) return;
                 // Handle file upload
-                //console.log("Uploading file:", file);
+                console.log("Uploading file:", file);
                 if (fileName.includes("Citizens")) {
-                  //console.log("Citizens upload detected");
+                  console.log("Citizens upload detected");
                 }
                 if (true) {
                   const reader = new FileReader();
@@ -594,7 +626,7 @@
                     try {
                       jsonData = jsyaml.load(yamlContent); // Parse YAML to JSON
                       let savesContent = yamlContent; // Store the JSON content in a global variable
-                      //console.log(jsonData); // Output JSON to console
+                      console.log(jsonData); // Output JSON to console
                     } catch (error) {
                       console.error("Error parsing YAML:", error);
                     }
@@ -622,6 +654,16 @@
 
         // Clear previous NPC list
         npcList.innerHTML = "";
+        if (manualMode) {
+          const manualModeContainer = document.getElementById('manualModeContainer');
+          const manualModeInput = `
+      <div class="mb-4">
+        <label for="manualModeInput" class="block text-sm font-medium text-gray-700">Manual Mode</label>
+        <input type="text" id="manualModeInput" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+      </div>
+    `;
+          manualModeContainer.innerHTML = manualModeInput;
+        }
 
         for (const npcId in npcData) {
           if (npcData.hasOwnProperty(npcId)) {
@@ -640,9 +682,9 @@
 
             // Determine if all NPCs should be selected based on migration mode
             if (MigrationMode === "all") {
-              //console.log(typeof npcIds[0]);
+              console.log(typeof npcIds[0]);
               if (npcIds.includes(parseInt(npcId))) {
-                //console.log("success");
+                console.log("success");
                 checkbox.checked = true;
               }
             }
@@ -730,8 +772,8 @@
 
                 // Append the image to the NPC info container
                 npcInfoContainer.appendChild(npcImage);
-                //console.log(npc.name);
-                //console.log(npc.traits.type);
+                console.log(npc.name);
+                console.log(npc.traits.type);
               } catch (error) {
                 console.error(
                   "Error parsing textureRaw JSON:" + npc.name,
@@ -885,7 +927,7 @@
               // Append the image to the NPC info container
               npcInfoContainer.appendChild(npcImage);
             } else {
-              //console.log(npc);
+              console.log(npc);
             }
 
             // Create an unordered list for NPC details
@@ -957,7 +999,7 @@
           const concatenated = input.id + input.name;
 
           // Encode to base64
-          const encoded = btoa(concatenated);
+          const encoded = encodeBase64(concatenated);
 
           // Crop the hashed string to the desired length
           const cropped = encoded.substring(0, hashLength);
@@ -969,12 +1011,63 @@
         }
 
         function processSelectedNPCs() {
-          const selectedNPCs = document.querySelectorAll(
-            'input[name="npc-checkbox"]:checked',
-          );
-          const selNPC = Array.from(selectedNPCs);
+          let selectedNPCs = []; // Initialize as an empty array
+
+          if (manualMode === true) {
+            const inputField = document.getElementById('manualModeInput');
+
+            const updateCheckboxes = () => {
+              const inputValue = inputField ? inputField.value : '';
+              selectedNPCs = inputValue
+                .split(/[,\s]+/) // Split by commas or any whitespace
+                .filter(item => item.trim() !== '') // Remove any empty items
+                .map(item => parseInt(item, 10)) // Convert strings to integers
+                .filter(item => !isNaN(item)); // Remove any non-numeric values
+
+              // Iterate over all checkboxes and update their checked status
+              const checkboxes = document.querySelectorAll('input[name="npc-checkbox"]');
+              checkboxes.forEach(checkbox => {
+                const npcId = parseInt(checkbox.id.replace('npc-checkbox-', ''), 10);
+                checkbox.checked = selectedNPCs.includes(npcId);
+
+                // Update the image based on checkbox state
+                const npcImage = document.getElementById(`npc-image-${npcId}`);
+                if (npcImage) {
+                  npcImage.style.opacity = checkbox.checked ? '1' : '0.5'; // Example visual feedback
+                }
+              });
+            };
+
+            // Call the update function initially
+            updateCheckboxes();
+
+            // Add event listener to the input field to listen for changes in real-time
+            inputField.addEventListener('input', updateCheckboxes);
+          } else {
+            selectedNPCs = Array.from(document.querySelectorAll(
+              'input[name="npc-checkbox"]:checked'
+            )).map(checkbox => parseInt(checkbox.id.replace('npc-checkbox-', ''), 10));
+
+            // Update image visibility based on selected NPCs
+            const checkboxes = document.querySelectorAll('input[name="npc-checkbox"]');
+            checkboxes.forEach(checkbox => {
+              const npcId = parseInt(checkbox.id.replace('npc-checkbox-', ''), 10);
+              const npcImage = document.getElementById(`npc-image-${npcId}`);
+              if (npcImage) {
+                npcImage.style.opacity = checkbox.checked ? '1' : '0.5'; // Example visual feedback
+              }
+            });
+          }
+
+          console.log(selectedNPCs); // Output the array to the console or use it as needed
+
+          if (selectedNPCs.length === 0) {
+            console.log("No NPCs selected.");
+            return; // Exit if there are no NPCs to process
+          }
+
           selectedNPCs.forEach((npc) => {
-            //console.log("forEach loop reached for npc.name");
+            console.log("forEach loop reached for npc.name");
             const npcId = npc.value;
             const npcData = jsonData.npc[npcId];
             const npcName = npcData.name;
@@ -1009,18 +1102,18 @@
             );
 
             // Log the current NPC ID and the found entry
-            //console.log("Current NPC ID:", currentNpcId);
-            //console.log("Found NPC Entry:", npcEntry);
+            console.log("Current NPC ID:", currentNpcId);
+            console.log("Found NPC Entry:", npcEntry);
 
             // If found, set the definitionId
             if (npcEntry) {
               const definitionId = npcEntry.npcEntryId;
-              //console.log("Definition ID set:", definitionId);
+              console.log("Definition ID set:", definitionId);
             } else {
-              //console.log("NPC ID not found in npcIdEntryArray");
-              //console.log(npcIdEntryArray);
+              console.log("NPC ID not found in npcIdEntryArray");
+              console.log(npcIdEntryArray);
             }
-            //console.log("reached part 1");
+            console.log("reached part 1");
             // Check if NPC type is "PLAYER"
             if (npcData.traits.type === "PLAYER") {
               // Extract relevant traits
@@ -1106,7 +1199,7 @@
                     return "";
                 }
               }
-              //console.log("reached part 1.1");
+              console.log("reached part 1.1");
               // Create JSON object for NPC data
               npcObject = {
                 name: npcName.toLowerCase(),
@@ -1181,7 +1274,7 @@
               npcData.traits.type === "IRON_GOLEM" ||
               npcData.traits.type === "WITCH"
             ) {
-              //console.log("processed", npcData.traits.type);
+              console.log("processed", npcData.traits.type);
               // Create JSON object for NPC data
               npcObject = {
                 name: npcName.toLowerCase(),
@@ -1243,7 +1336,7 @@
               //add npc id to notMigratableNPCs
               notMigratableNPCs.push(npcId);
             }
-            //console.log("forEach loop part 2 reached for npc.name");
+            console.log("forEach loop part 2 reached for npc.name");
 
             //funcion for checking for data
             function checkData(data) {
@@ -1304,22 +1397,22 @@
               }
             }
 
-            //console.log("forEach loop part 3 reached for npc.name");
+            console.log("forEach loop part 3 reached for npc.name");
             // Create a Blob object containing the JSON data
             const blob = new Blob([JSON.stringify(npcObject, null, 2)], {
               type: "application/json",
             });
 
             if (notMigratableNPCs.includes(npcId)) {
-              //console.log("not migratable npc", npcId);
-              //console.log("not migratable npc", npcName);
-              //console.log("not migratable npc", npcData);
-              //console.log("not migratable npc", npcObject);
-              //console.log("not migratable npc", npcObject.entries);
-              //console.log("not migratable npc", npcObject.entries[0].data);
-              //console.log("not migratable npc", npcObject.entries[0].data[0]);
-              //console.log("not migratable npc", npcObject.entries[0].data[0].split("_")[0]);
-              //console.log("not migratable npc", npcObject.entries[0].data[0].split("_")[1]);
+              console.log("not migratable npc", npcId);
+              console.log("not migratable npc", npcName);
+              console.log("not migratable npc", npcData);
+              console.log("not migratable npc", npcObject);
+              console.log("not migratable npc", npcObject.entries);
+              console.log("not migratable npc", npcObject.entries[0].data);
+              console.log("not migratable npc", npcObject.entries[0].data[0]);
+              console.log("not migratable npc", npcObject.entries[0].data[0].split("_")[0]);
+              console.log("not migratable npc", npcObject.entries[0].data[0].split("_")[1]);
             } else {
               // Create a download link
               const downloadLink = document.createElement("a");
@@ -1331,7 +1424,7 @@
           });
 
           const yamlData = jsyaml.dump(jsonData, { lineWidth: -1 });
-          //console.log(yamlData); // Output YAML to console
+          console.log(yamlData); // Output YAML to console
           //download the yaml file
           const yamlBlob = new Blob([yamlData], { type: "application/yaml" });
           const yamlDownloadLink = document.createElement("a");
